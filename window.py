@@ -22,6 +22,7 @@ class Dialog(QDialog):
 
         #inside of the main layout is a scroll area
         self.scroll_area = QScrollArea(self.central_widget)
+        self.scroll_area.setWidgetResizable(True)
         self.mainLayout.addWidget(self.scroll_area)
 
         #inside of the scroll area is another widget that will contain everything else
@@ -35,31 +36,19 @@ class Dialog(QDialog):
 
         #create the box for basic information
         basic_box = self.create_form_group_box(start_y=0)
-#        self.mainLayout.addWidget(basic_box)
         self.boxes_layout.addWidget(basic_box)
-#        self.scroll_area.setWidget(basic_box)
 
 
         #create the box for system information
-        self.system_box = self.create_system_box(start_y=200)
-#        self.mainLayout.addWidget(self.system_box)
+        self.system_box = self.create_system_box(start_y=0)
         self.boxes_layout.addWidget(self.system_box)
-
-
-        #make the window scrollable
-        #scroll = QScrollArea()
-        #scroll.setWidget(self)
-
 
 
 
 
 
         self.scroll_area.setWidget(self.boxes_widget)
-
-
         self.setLayout(self.mainLayout)
-#        self.setLayout(self.boxes_layout)
 
         #set the dimensions of the form
 #        self.setGeometry(10,10,500,500)
@@ -176,8 +165,9 @@ class Dialog(QDialog):
         print('PyQt5 button click')
 
         #create the box for system information
-        self.system_box = self.create_system_box(start_y=200)
-        self.mainLayout.addWidget(self.system_box)
+        self.system_box = self.create_system_box(start_y=0)
+#        self.mainLayout.addWidget(self.system_box)
+        self.boxes_layout.addWidget(self.system_box)
 
 
  
