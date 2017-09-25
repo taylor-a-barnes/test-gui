@@ -1,41 +1,47 @@
 from PyQt5.QtWidgets import (QApplication, QComboBox, QDialog,
         QDialogButtonBox, QFormLayout, QGridLayout, QGroupBox, QHBoxLayout,
         QLabel, QLineEdit, QMenu, QMenuBar, QPushButton, QSpinBox, QTextEdit,
-        QVBoxLayout)
+        QVBoxLayout, QCheckBox)
 from PyQt5.QtCore import pyqtSlot
  
 import sys
  
 class Dialog(QDialog):
-#    NumGridRows = 3
-#    NumButtons = 4
  
     def __init__(self):
         super(Dialog, self).__init__()
-        self.createFormGroupBox()
+        basic_box = self.create_form_group_box(start_y=0)
  
-        buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        buttonBox.accepted.connect(self.accept)
-        buttonBox.rejected.connect(self.reject)
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
  
         mainLayout = QVBoxLayout()
-        mainLayout.addWidget(self.formGroupBox)
+        mainLayout.addWidget(basic_box)
 #        mainLayout.addWidget(buttonBox)
         self.setLayout(mainLayout)
  
         self.setWindowTitle("Quantum ESPRESSO Input Form")
 
+        print(str(self.height()))
+
+
+
+
+
+
+
         #set the dimensions of the form
-        self.setGeometry(10,10,500,500)
+#        self.setGeometry(10,10,500,500)
  
-    def createFormGroupBox(self):
-        self.formGroupBox = QGroupBox("Basic Information")
+    def create_form_group_box(self,start_y):
+        form_group_box = QGroupBox("Basic Information")
 
         #set GroupBox information
         #self.formGroupBox.setMaximumHeight(200)
-        self.formGroupBox.setFixedHeight(200)
+        form_group_box.setFixedHeight(200)
         #self.setContentsMargins(0,100,0,0)
-        self.setContentsMargins(0,0,0,0)
+        self.setContentsMargins(0,start_y,0,0)
 
 
 
@@ -62,13 +68,22 @@ class Dialog(QDialog):
         self.calculationComboBox.addItem("Molecular Dynamics") #note: includes vc-md
         layout.addRow(QLabel("Calculation:"), self.calculationComboBox)
 
+        #verbosity
+        layout.addRow(QLabel("Verbose:"), QCheckBox())
+
+        #restart_mode
+        layout.addRow(QLabel("Restart:"), QCheckBox())
+
+        #wf_collect - just set to .true.
+        layout.addRow(QLabel("Collect Wavefunctions:"), QCheckBox())
 
 
 
 
 
 
-        self.formGroupBox.setLayout(layout)
+
+        form_group_box.setLayout(layout)
 
 
 
@@ -77,6 +92,8 @@ class Dialog(QDialog):
 #        button.move(100,410)
         button.clicked.connect(self.on_click)
         layout.addRow(button)
+
+        return form_group_box
 
 
 
