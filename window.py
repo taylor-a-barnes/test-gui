@@ -10,20 +10,34 @@ class Dialog(QDialog):
  
     def __init__(self):
         super(Dialog, self).__init__()
-        basic_box = self.create_form_group_box(start_y=0)
+
+
+        self.setWindowTitle("Quantum ESPRESSO Input Form")
  
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        button_box.accepted.connect(self.accept)
-        button_box.rejected.connect(self.reject)
+        #button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        #button_box.accepted.connect(self.accept)
+        #button_box.rejected.connect(self.reject)
+        #mainLayout.addWidget(buttonBox)
  
         mainLayout = QVBoxLayout()
+
+
+
+        #create the box for basic information
+        basic_box = self.create_form_group_box(start_y=0)
         mainLayout.addWidget(basic_box)
-#        mainLayout.addWidget(buttonBox)
+        print(str(self.height()))
+
+
+
+        #create the box for system information
+        system_box = self.create_system_box(start_y=200)
+        mainLayout.addWidget(system_box)
+
+
         self.setLayout(mainLayout)
  
-        self.setWindowTitle("Quantum ESPRESSO Input Form")
 
-        print(str(self.height()))
 
 
 
@@ -94,6 +108,51 @@ class Dialog(QDialog):
         layout.addRow(button)
 
         return form_group_box
+
+
+
+
+    def create_system_box(self,start_y):
+        form_group_box = QGroupBox("System Information")
+
+        #set GroupBox information
+        #self.formGroupBox.setMaximumHeight(200)
+        form_group_box.setFixedHeight(200)
+        #self.setContentsMargins(0,100,0,0)
+        #form_group_box.setContentsMargins(0,start_y,0,0)
+        #form_group_box.setContentsMargins(0,50,0,0)
+
+
+
+        layout = QFormLayout()
+
+
+#        self.formGroupBox.setFlat(False)
+
+
+
+        #title
+        titleLineEdit = QLineEdit()
+        titleLineEdit.setToolTip('Enter a title for the calculation.\nThis has no impact on the results.')
+        layout.addRow(QLabel("nstep:"), titleLineEdit)
+
+
+
+
+        form_group_box.setLayout(layout)
+
+
+
+        button = QPushButton('Next', self)
+        button.setToolTip('Proceed to the next input set.')
+        button.clicked.connect(self.on_click)
+        layout.addRow(button)
+
+        return form_group_box
+
+
+
+
 
 
 
