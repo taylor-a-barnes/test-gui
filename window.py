@@ -49,11 +49,11 @@ class Dialog(QDialog):
 #        self.setGeometry(10,10,500,500)
  
     def create_form_group_box(self,start_y):
-        form_group_box = QGroupBox("Basic Information")
+        group_box = QGroupBox("Basic Information")
 
         #set GroupBox information
         #self.formGroupBox.setMaximumHeight(200)
-        form_group_box.setFixedHeight(200)
+        group_box.setFixedHeight(200)
         #self.setContentsMargins(0,100,0,0)
         self.setContentsMargins(0,start_y,0,0)
 
@@ -97,27 +97,26 @@ class Dialog(QDialog):
 
 
 
-        form_group_box.setLayout(layout)
+        group_box.setLayout(layout)
 
 
 
         button = QPushButton('Next', self)
         button.setToolTip('Proceed to the next input set.')
-#        button.move(100,410)
         button.clicked.connect(self.on_click)
         layout.addRow(button)
 
-        return form_group_box
+        return group_box
 
 
 
 
     def create_system_box(self,start_y):
-        form_group_box = QGroupBox("System Information")
+        group_box = QGroupBox("System Information")
 
         #set GroupBox information
         #self.formGroupBox.setMaximumHeight(200)
-        form_group_box.setFixedHeight(200)
+        group_box.setFixedHeight(200)
         #self.setContentsMargins(0,100,0,0)
         #form_group_box.setContentsMargins(0,start_y,0,0)
         #form_group_box.setContentsMargins(0,50,0,0)
@@ -139,7 +138,7 @@ class Dialog(QDialog):
 
 
 
-        form_group_box.setLayout(layout)
+        group_box.setLayout(layout)
 
 
 
@@ -148,7 +147,7 @@ class Dialog(QDialog):
         button.clicked.connect(self.on_click)
         layout.addRow(button)
 
-        return form_group_box
+        return group_box
 
 
 
