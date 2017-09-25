@@ -1,7 +1,7 @@
-from PyQt5.QtWidgets import (QApplication, QComboBox, QDialog,
+from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog,
         QDialogButtonBox, QFormLayout, QGridLayout, QGroupBox, QHBoxLayout,
-        QLabel, QLineEdit, QMenu, QMenuBar, QPushButton, QSpinBox, QTextEdit,
-        QVBoxLayout, QCheckBox)
+        QLabel, QLineEdit, QMenu, QMenuBar, QPushButton, QScrollArea, QSpinBox, 
+        QTextEdit, QVBoxLayout, QWidget)
 from PyQt5.QtCore import pyqtSlot
  
 import sys
@@ -12,38 +12,54 @@ class Dialog(QDialog):
         super(Dialog, self).__init__()
 
 
+
+        self.central_widget = QWidget()
+
         self.setWindowTitle("Quantum ESPRESSO Input Form")
  
-        #button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        #button_box.accepted.connect(self.accept)
-        #button_box.rejected.connect(self.reject)
-        #mainLayout.addWidget(buttonBox)
- 
-        mainLayout = QVBoxLayout()
+        self.mainLayout = QVBoxLayout(self.central_widget)
+
+
+        #inside of the main layout is a scroll area
+        self.scroll_area = QScrollArea(self.central_widget)
+        self.mainLayout.addWidget(self.scroll_area)
+
+        #inside of the scroll area is another widget that will contain everything else
+        self.boxes_widget = QWidget()
+        self.boxes_layout = QVBoxLayout(self.boxes_widget)
+
+
+
 
 
 
         #create the box for basic information
         basic_box = self.create_form_group_box(start_y=0)
-        mainLayout.addWidget(basic_box)
-        print(str(self.height()))
-
+#        self.mainLayout.addWidget(basic_box)
+        self.boxes_layout.addWidget(basic_box)
+#        self.scroll_area.setWidget(basic_box)
 
 
         #create the box for system information
-        system_box = self.create_system_box(start_y=200)
-        mainLayout.addWidget(system_box)
+        self.system_box = self.create_system_box(start_y=200)
+#        self.mainLayout.addWidget(self.system_box)
+        self.boxes_layout.addWidget(self.system_box)
 
 
-        self.setLayout(mainLayout)
- 
+        #make the window scrollable
+        #scroll = QScrollArea()
+        #scroll.setWidget(self)
 
 
 
 
 
 
+        self.scroll_area.setWidget(self.boxes_widget)
 
+
+        self.setLayout(self.mainLayout)
+#        self.setLayout(self.boxes_layout)
 
         #set the dimensions of the form
 #        self.setGeometry(10,10,500,500)
@@ -158,6 +174,10 @@ class Dialog(QDialog):
     @pyqtSlot()
     def on_click(self):
         print('PyQt5 button click')
+
+        #create the box for system information
+        self.system_box = self.create_system_box(start_y=200)
+        self.mainLayout.addWidget(self.system_box)
 
 
  
