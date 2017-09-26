@@ -35,12 +35,12 @@ class Dialog(QDialog):
 
 
         #create the box for basic information
-        basic_box = self.create_form_group_box(start_y=0)
+        basic_box = self.create_form_group_box()
         self.boxes_layout.addWidget(basic_box)
 
 
         #create the box for system information
-        self.system_box = self.create_system_box(start_y=0)
+        self.system_box = self.create_system_box()
         self.boxes_layout.addWidget(self.system_box)
 
 
@@ -53,14 +53,14 @@ class Dialog(QDialog):
         #set the dimensions of the form
 #        self.setGeometry(10,10,500,500)
  
-    def create_form_group_box(self,start_y):
+    def create_form_group_box(self):
         group_box = QGroupBox("Basic Information")
 
         #set GroupBox information
         #self.formGroupBox.setMaximumHeight(200)
         group_box.setFixedHeight(200)
         #self.setContentsMargins(0,100,0,0)
-        self.setContentsMargins(0,start_y,0,0)
+        #self.setContentsMargins(0,start_y,0,0)
 
 
 
@@ -116,29 +116,33 @@ class Dialog(QDialog):
 
 
 
-    def create_system_box(self,start_y):
+
+    def create_system_box(self):
         group_box = QGroupBox("System Information")
 
-        #set GroupBox information
-        #self.formGroupBox.setMaximumHeight(200)
-        group_box.setFixedHeight(200)
-        #self.setContentsMargins(0,100,0,0)
-        #form_group_box.setContentsMargins(0,start_y,0,0)
-        #form_group_box.setContentsMargins(0,50,0,0)
-
-
+        #set group_box information
+        #group_box.setFixedHeight(200)
 
         layout = QFormLayout()
 
 
-#        self.formGroupBox.setFlat(False)
 
+        #--------------------------------------------------------#
+        # System Inputs
+        #--------------------------------------------------------#
 
-
-        #title
+        #nstep
         titleLineEdit = QLineEdit()
         titleLineEdit.setToolTip('Enter a title for the calculation.\nThis has no impact on the results.')
         layout.addRow(QLabel("nstep:"), titleLineEdit)
+
+
+
+
+        button = QPushButton('Next', self)
+        button.setToolTip('Proceed to the next input set.')
+        button.clicked.connect(self.on_click)
+        layout.addRow(button)
 
 
 
@@ -147,10 +151,6 @@ class Dialog(QDialog):
 
 
 
-        button = QPushButton('Next', self)
-        button.setToolTip('Proceed to the next input set.')
-        button.clicked.connect(self.on_click)
-        layout.addRow(button)
 
         return group_box
 
@@ -165,7 +165,7 @@ class Dialog(QDialog):
         print('PyQt5 button click')
 
         #create the box for system information
-        self.system_box = self.create_system_box(start_y=0)
+        self.system_box = self.create_system_box()
         self.boxes_layout.addWidget(self.system_box)
 
 
