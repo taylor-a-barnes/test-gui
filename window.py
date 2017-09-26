@@ -35,12 +35,13 @@ class Dialog(QDialog):
 
 
         #create the box for basic information
-        basic_box = self.create_form_group_box()
+        #basic_box = self.create_form_group_box()
+        basic_box = self.create_box('basic')
         self.boxes_layout.addWidget(basic_box)
 
 
         #create the box for system information
-        self.system_box = self.create_box()
+        self.system_box = self.create_box("system")
         self.boxes_layout.addWidget(self.system_box)
 
 
@@ -115,7 +116,7 @@ class Dialog(QDialog):
 
 
 
-    def create_box(self):
+    def create_box(self,group_name):
 
         group_box = QGroupBox("System Information")
 
@@ -124,11 +125,50 @@ class Dialog(QDialog):
 
         layout = QFormLayout()
 
-        self.create_system_box(layout)
+        if group_name == 'basic':
+            self.create_basic_box(layout)
+        elif group_name == 'system':
+            self.create_system_box(layout)
+        else:
+            raise LookupError('Group name not recognized')
 
         group_box.setLayout(layout)
 
         return group_box
+
+
+
+    def create_basic_box(self,layout):
+
+        #title
+        titleLineEdit = QLineEdit()
+        titleLineEdit.setToolTip('Enter a title for the calculation.\nThis has no impact on the results.')
+        layout.addRow(QLabel("Title:"), titleLineEdit)
+
+        #calculation
+        self.calculationComboBox = QComboBox()
+        self.calculationComboBox.addItem("SCF (Self-Consistent Field)")
+        self.calculationComboBox.addItem("NSCF (Non-Self-Consistent Field)") #replace with maximum_iterations?
+        self.calculationComboBox.addItem("Bands") #how is this different from NSCF?
+        self.calculationComboBox.addItem("Geometry Relaxation") #note: includes vc-relax
+        self.calculationComboBox.addItem("Molecular Dynamics") #note: includes vc-md
+        layout.addRow(QLabel("Calculation:"), self.calculationComboBox)
+
+        #verbosity
+        layout.addRow(QLabel("Verbose:"), QCheckBox())
+
+        #restart_mode
+        layout.addRow(QLabel("Restart:"), QCheckBox())
+
+        #wf_collect - just set to .true.
+        layout.addRow(QLabel("Collect Wavefunctions:"), QCheckBox())
+
+        button = QPushButton('Next', self)
+        button.setToolTip('Proceed to the next input set.')
+        button.clicked.connect(self.on_click)
+        layout.addRow(button)
+
+
         
 
 
@@ -168,7 +208,7 @@ class Dialog(QDialog):
         print('PyQt5 button click')
 
         #create the box for system information
-        self.system_box = self.create_box()
+        self.system_box = self.create_box('system')
         self.boxes_layout.addWidget(self.system_box)
 
 
