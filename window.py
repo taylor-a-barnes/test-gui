@@ -17,13 +17,13 @@ class Dialog(QDialog):
 
         self.setWindowTitle("Quantum ESPRESSO Input Form")
  
-        self.mainLayout = QVBoxLayout(self.central_widget)
+        self.main_layout = QVBoxLayout(self.central_widget)
 
 
         #inside of the main layout is a scroll area
         self.scroll_area = QScrollArea(self.central_widget)
         self.scroll_area.setWidgetResizable(True)
-        self.mainLayout.addWidget(self.scroll_area)
+        self.main_layout.addWidget(self.scroll_area)
 
         #inside of the scroll area is another widget that will contain everything else
         self.boxes_widget = QWidget()
@@ -48,7 +48,7 @@ class Dialog(QDialog):
 
 
         self.scroll_area.setWidget(self.boxes_widget)
-        self.setLayout(self.mainLayout)
+        self.setLayout(self.main_layout)
 
         #set the dimensions of the form
 #        self.setGeometry(10,10,500,500)
@@ -166,7 +166,6 @@ class Dialog(QDialog):
 
         #create the box for system information
         self.system_box = self.create_system_box(start_y=0)
-#        self.mainLayout.addWidget(self.system_box)
         self.boxes_layout.addWidget(self.system_box)
 
 
