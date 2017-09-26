@@ -40,7 +40,7 @@ class Dialog(QDialog):
 
 
         #create the box for system information
-        self.system_box = self.create_system_box()
+        self.system_box = self.create_box()
         self.boxes_layout.addWidget(self.system_box)
 
 
@@ -115,15 +115,24 @@ class Dialog(QDialog):
 
 
 
+    def create_box(self):
 
-
-    def create_system_box(self):
         group_box = QGroupBox("System Information")
 
         #set group_box information
         #group_box.setFixedHeight(200)
 
         layout = QFormLayout()
+
+        self.create_system_box(layout)
+
+        group_box.setLayout(layout)
+
+        return group_box
+        
+
+
+    def create_system_box(self,layout):
 
 
 
@@ -147,12 +156,6 @@ class Dialog(QDialog):
 
 
 
-        group_box.setLayout(layout)
-
-
-
-
-        return group_box
 
 
 
@@ -165,7 +168,7 @@ class Dialog(QDialog):
         print('PyQt5 button click')
 
         #create the box for system information
-        self.system_box = self.create_system_box()
+        self.system_box = self.create_box()
         self.boxes_layout.addWidget(self.system_box)
 
 
