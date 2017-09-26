@@ -54,67 +54,6 @@ class Dialog(QDialog):
         #set the dimensions of the form
 #        self.setGeometry(10,10,500,500)
  
-    def create_form_group_box(self):
-        group_box = QGroupBox("Basic Information")
-
-        #set GroupBox information
-        #self.formGroupBox.setMaximumHeight(200)
-        group_box.setFixedHeight(200)
-        #self.setContentsMargins(0,100,0,0)
-        #self.setContentsMargins(0,start_y,0,0)
-
-
-
-        layout = QFormLayout()
-
-
-#        self.formGroupBox.setFlat(False)
-
-
-
-        #title
-        titleLineEdit = QLineEdit()
-        titleLineEdit.setToolTip('Enter a title for the calculation.\nThis has no impact on the results.')
-        layout.addRow(QLabel("Title:"), titleLineEdit)
-#        layout.addRow(QLabel("Calculation:"), QComboBox())
-#        layout.addRow(QLabel("Age:"), QSpinBox())
-
-        #calculation
-        self.calculationComboBox = QComboBox()
-        self.calculationComboBox.addItem("SCF (Self-Consistent Field)")
-        self.calculationComboBox.addItem("NSCF (Non-Self-Consistent Field)") #replace with maximum_iterations?
-        self.calculationComboBox.addItem("Bands") #how is this different from NSCF?
-        self.calculationComboBox.addItem("Geometry Relaxation") #note: includes vc-relax
-        self.calculationComboBox.addItem("Molecular Dynamics") #note: includes vc-md
-        layout.addRow(QLabel("Calculation:"), self.calculationComboBox)
-
-        #verbosity
-        layout.addRow(QLabel("Verbose:"), QCheckBox())
-
-        #restart_mode
-        layout.addRow(QLabel("Restart:"), QCheckBox())
-
-        #wf_collect - just set to .true.
-        layout.addRow(QLabel("Collect Wavefunctions:"), QCheckBox())
-
-
-
-
-
-
-
-        group_box.setLayout(layout)
-
-
-
-        button = QPushButton('Next', self)
-        button.setToolTip('Proceed to the next input set.')
-        button.clicked.connect(self.on_click)
-        layout.addRow(button)
-
-        return group_box
-
-
 
     def create_box(self,group_name):
 
