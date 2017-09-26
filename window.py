@@ -57,7 +57,8 @@ class Dialog(QDialog):
 
     def create_box(self,group_name):
 
-        group_box = QGroupBox("System Information")
+#        group_box = QGroupBox("System Information")
+        group_box = InputBox("System Information")
 
         #set group_box information
         #group_box.setFixedHeight(200)
@@ -111,20 +112,15 @@ class Dialog(QDialog):
         
 
 
+    #--------------------------------------------------------#
+    # System Inputs
+    #--------------------------------------------------------#
     def create_system_box(self,layout):
-
-
-
-        #--------------------------------------------------------#
-        # System Inputs
-        #--------------------------------------------------------#
 
         #nstep
         titleLineEdit = QLineEdit()
         titleLineEdit.setToolTip('Enter a title for the calculation.\nThis has no impact on the results.')
         layout.addRow(QLabel("nstep:"), titleLineEdit)
-
-
 
 
         button = QPushButton('Next', self)
@@ -149,6 +145,15 @@ class Dialog(QDialog):
         #create the box for system information
         self.system_box = self.create_box('system')
         self.boxes_layout.addWidget(self.system_box)
+
+
+
+class InputBox(QGroupBox):
+ 
+    def __init__(self,name):
+        super(QGroupBox, self).__init__(name)
+        
+
 
 
  
