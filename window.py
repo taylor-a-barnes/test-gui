@@ -58,32 +58,30 @@ class Dialog(QDialog):
     def create_box(self,group_name):
 
 #        group_box = QGroupBox("System Information")
-        group_box = InputBox("System Information")
+        group_box = InputBox("System Information",self)
 
         #set group_box information
         #group_box.setFixedHeight(200)
 
-        layout = QFormLayout()
-
         if group_name == 'basic':
-            self.create_basic_box(layout)
+            self.create_basic_box(group_box)
         elif group_name == 'system':
-            self.create_system_box(layout)
+            self.create_system_box(group_box)
         else:
             raise LookupError('Group name not recognized')
 
-        group_box.setLayout(layout)
+        group_box.setLayout(group_box.layout)
 
         return group_box
 
 
 
-    def create_basic_box(self,layout):
+    def create_basic_box(self,group_box):
 
         #title
         titleLineEdit = QLineEdit()
         titleLineEdit.setToolTip('Enter a title for the calculation.\nThis has no impact on the results.')
-        layout.addRow(QLabel("Title:"), titleLineEdit)
+        group_box.layout.addRow(QLabel("Title:"), titleLineEdit)
 
         #calculation
         self.calculationComboBox = QComboBox()
@@ -92,21 +90,23 @@ class Dialog(QDialog):
         self.calculationComboBox.addItem("Bands") #how is this different from NSCF?
         self.calculationComboBox.addItem("Geometry Relaxation") #note: includes vc-relax
         self.calculationComboBox.addItem("Molecular Dynamics") #note: includes vc-md
-        layout.addRow(QLabel("Calculation:"), self.calculationComboBox)
+        group_box.layout.addRow(QLabel("Calculation:"), self.calculationComboBox)
 
         #verbosity
-        layout.addRow(QLabel("Verbose:"), QCheckBox())
+        group_box.layout.addRow(QLabel("Verbose:"), QCheckBox())
 
         #restart_mode
-        layout.addRow(QLabel("Restart:"), QCheckBox())
+        group_box.layout.addRow(QLabel("Restart:"), QCheckBox())
 
         #wf_collect - just set to .true.
-        layout.addRow(QLabel("Collect Wavefunctions:"), QCheckBox())
+        group_box.layout.addRow(QLabel("Collect Wavefunctions:"), QCheckBox())
 
         button = QPushButton('Next', self)
         button.setToolTip('Proceed to the next input set.')
-        button.clicked.connect(self.on_click)
-        layout.addRow(button)
+        button.clicked.connect(group_box.on_click)
+        group_box.layout.addRow(button)
+
+        group_box.next_group_box = 'system'
 
 
         
@@ -115,18 +115,20 @@ class Dialog(QDialog):
     #--------------------------------------------------------#
     # System Inputs
     #--------------------------------------------------------#
-    def create_system_box(self,layout):
+    def create_system_box(self,group_box):
 
         #nstep
         titleLineEdit = QLineEdit()
         titleLineEdit.setToolTip('Enter a title for the calculation.\nThis has no impact on the results.')
-        layout.addRow(QLabel("nstep:"), titleLineEdit)
+        group_box.layout.addRow(QLabel("nstep:"), titleLineEdit)
 
 
         button = QPushButton('Next', self)
         button.setToolTip('Proceed to the next input set.')
-        button.clicked.connect(self.on_click)
-        layout.addRow(button)
+        button.clicked.connect(group_box.on_click)
+        group_box.layout.addRow(button)
+
+        group_box.next_group_box = 'data'
 
 
 
@@ -137,21 +139,21 @@ class Dialog(QDialog):
 
 
 
+class InputBox(QGroupBox):
+ 
+    def __init__(self,name,parent):
+        super(QGroupBox, self).__init__(name,parent)
+        
+        self.layout = QFormLayout()
+        self.parent = parent
 
     @pyqtSlot()
     def on_click(self):
         print('PyQt5 button click')
 
         #create the box for system information
-        self.system_box = self.create_box('system')
-        self.boxes_layout.addWidget(self.system_box)
-
-
-
-class InputBox(QGroupBox):
- 
-    def __init__(self,name):
-        super(QGroupBox, self).__init__(name)
+        self.parent.system_box = self.parent.create_box(self.next_group_box)
+        self.parent.boxes_layout.addWidget(self.parent.system_box)
         
 
 
