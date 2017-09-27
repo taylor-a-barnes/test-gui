@@ -91,13 +91,14 @@ class Dialog(QDialog):
         widget.textChanged.connect( widget.on_text_changed )
 
         #calculation
-        self.calculationComboBox = QComboBox()
-        self.calculationComboBox.addItem("SCF (Self-Consistent Field)")
-        self.calculationComboBox.addItem("NSCF (Non-Self-Consistent Field)") #replace with maximum_iterations?
-        self.calculationComboBox.addItem("Bands") #how is this different from NSCF?
-        self.calculationComboBox.addItem("Geometry Relaxation") #note: includes vc-relax
-        self.calculationComboBox.addItem("Molecular Dynamics") #note: includes vc-md
-        group_box.layout.addRow(QLabel("Calculation:"), self.calculationComboBox)
+        widget = InputCombo( group_box, "calculation" )
+        widget.addItem("SCF (Self-Consistent Field)", userData = "scf")
+        widget.addItem("NSCF (Non-Self-Consistent Field)", userData = "nscf") #replace with maximum_iterations?
+        widget.addItem("Bands", userData = "bands") #how is this different from NSCF?
+        widget.addItem("Geometry Relaxation", userData = "relax") #note: includes vc-relax
+        widget.addItem("Molecular Dynamics", userData = "md") #note: includes vc-md
+        group_box.layout.addRow(QLabel("Calculation:"), widget)
+        widget.currentIndexChanged.connect( widget.on_index_changed )
 
         #verbosity
         group_box.layout.addRow(QLabel("Verbose:"), QCheckBox())
@@ -983,6 +984,23 @@ class InputText(QLineEdit):
         input_file.inputs[self.input_name] = string
         #print(input_file.inputs)
 
+
+
+
+
+
+
+class InputCombo(QComboBox):
+
+    def __init__(self, parent_, input_name = None):
+        super(QComboBox, self).__init__(parent = parent_)
+
+        self.input_name = input_name
+
+    @pyqtSlot(int)
+    def on_index_changed(self, index):
+        
+        input_file.inputs[self.input_name] = index
 
 
 
