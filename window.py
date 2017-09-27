@@ -8,9 +8,10 @@ import sys
  
 class Dialog(QDialog):
  
-    def __init__(self):
+    def __init__(self, input_file):
         super(Dialog, self).__init__()
 
+        self.input_file = input_file
 
 
         self.central_widget = QWidget()
@@ -84,9 +85,9 @@ class Dialog(QDialog):
     def create_basic_box(self,group_box):
 
         #title
-        titleLineEdit = QLineEdit()
-        titleLineEdit.setToolTip('Enter a title for the calculation.\nThis has no impact on the results.')
-        group_box.layout.addRow(QLabel("Title:"), titleLineEdit)
+        widget = QLineEdit()
+        widget.setToolTip('Enter a title for the calculation.\nThis has no impact on the results.')
+        group_box.layout.addRow(QLabel("Title:"), widget)
 
         #calculation
         self.calculationComboBox = QComboBox()
@@ -952,7 +953,7 @@ class Dialog(QDialog):
 
 class InputBox(QGroupBox):
  
-    def __init__(self,name,parent):
+    def __init__(self, name, parent):
         super(QGroupBox, self).__init__(name,parent)
         
         self.layout = QFormLayout()
@@ -965,7 +966,25 @@ class InputBox(QGroupBox):
         #create the box for system information
         self.parent.system_box = self.parent.create_box(self.next_group_box)
         self.parent.boxes_layout.addWidget(self.parent.system_box)
-        
+
+
+
+
+
+
+
+
+class QuantumEspressoInputFile(QDialog):
+ 
+    def __init__(self):
+
+        inputs = {}
+
+    def set_input(self, name, value):
+
+        inputs[name] = value
+
+
 
 
 
@@ -973,5 +992,6 @@ class InputBox(QGroupBox):
  
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    dialog = Dialog()
+    input_file = QuantumEspressoInputFile()
+    dialog = Dialog(input_file)
 sys.exit(dialog.exec_())
