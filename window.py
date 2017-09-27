@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog,
         QDialogButtonBox, QFormLayout, QGridLayout, QGroupBox, QHBoxLayout,
         QLabel, QLineEdit, QMenu, QMenuBar, QPushButton, QScrollArea, QSpinBox, 
-        QTextEdit, QVBoxLayout, QWidget)
-from PyQt5.QtCore import pyqtSlot
+        QTextEdit, QVBoxLayout, QWidget )
+from PyQt5.QtCore import (pyqtSlot)
  
 import sys
  
@@ -60,7 +60,7 @@ class Dialog(QDialog):
 
 #        group_box = QGroupBox("System Information")
         name = group_name + " Information"
-        group_box = InputBox(name,self)
+        group_box = InputBox(name)
 
         #set group_box information
         #group_box.setFixedHeight(200)
@@ -85,9 +85,10 @@ class Dialog(QDialog):
     def create_basic_box(self,group_box):
 
         #title
-        widget = QLineEdit()
+        widget = InputText( group_box, input_name="title" )
         widget.setToolTip('Enter a title for the calculation.\nThis has no impact on the results.')
         group_box.layout.addRow(QLabel("Title:"), widget)
+        widget.textChanged.connect( widget.on_text_changed )
 
         #calculation
         self.calculationComboBox = QComboBox()
@@ -953,19 +954,34 @@ class Dialog(QDialog):
 
 class InputBox(QGroupBox):
  
-    def __init__(self, name, parent):
-        super(QGroupBox, self).__init__(name,parent)
+    def __init__(self, name):
+        super(QGroupBox, self).__init__(name)
         
         self.layout = QFormLayout()
-        self.parent = parent
 
     @pyqtSlot()
     def on_click(self):
         print('PyQt5 button click')
 
         #create the box for system information
-        self.parent.system_box = self.parent.create_box(self.next_group_box)
-        self.parent.boxes_layout.addWidget(self.parent.system_box)
+        self.window().system_box = self.window().create_box(self.next_group_box)
+        self.window().boxes_layout.addWidget(self.window().system_box)
+
+
+
+
+class InputText(QLineEdit):
+
+    def __init__(self, parent_, input_name = None):
+        super(QLineEdit, self).__init__(parent = parent_)
+
+        self.input_name = input_name
+
+    @pyqtSlot(str)
+    def on_text_changed(self, string):
+        
+        input_file.inputs[self.input_name] = string
+        #print(input_file.inputs)
 
 
 
@@ -973,22 +989,21 @@ class InputBox(QGroupBox):
 
 
 
-
-class QuantumEspressoInputFile(QDialog):
+class QuantumEspressoInputFile():
  
     def __init__(self):
 
-        inputs = {}
+        self.inputs = {}
 
     def set_input(self, name, value):
 
-        inputs[name] = value
+        self.inputs[name] = value
 
 
 
 
 
- 
+
  
 if __name__ == '__main__':
     app = QApplication(sys.argv)
