@@ -101,7 +101,10 @@ class Dialog(QDialog):
         widget.currentIndexChanged.connect( widget.on_index_changed )
 
         #verbosity
-        group_box.layout.addRow(QLabel("Verbose:"), QCheckBox())
+        widget = InputCheck( group_box, input_name="verbosity")
+        group_box.layout.addRow(QLabel("Verbosity:"), widget)
+        widget.stateChanged.connect( widget.on_state_changed )
+        #group_box.layout.addRow(QLabel("Verbose:"), QCheckBox())
 
         #restart_mode
         group_box.layout.addRow(QLabel("Restart:"), QCheckBox())
@@ -1001,6 +1004,22 @@ class InputCombo(QComboBox):
     def on_index_changed(self, index):
         
         input_file.inputs[self.input_name] = index
+
+
+
+
+
+class InputCheck(QCheckBox):
+
+    def __init__(self, parent_, input_name = None):
+        super(QCheckBox, self).__init__(parent = parent_)
+
+        self.input_name = input_name
+
+    @pyqtSlot(int)
+    def on_state_changed(self, value):
+        
+        input_file.inputs[self.input_name] = value
 
 
 
