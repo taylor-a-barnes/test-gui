@@ -1,3 +1,7 @@
+"""
+Simple GUI for Quantum ESPRESSO
+"""
+
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog,
         QDialogButtonBox, QFormLayout, QGridLayout, QGroupBox, QHBoxLayout,
         QLabel, QLineEdit, QMenu, QMenuBar, QPushButton, QScrollArea, QSpinBox, 
@@ -957,6 +961,10 @@ class Dialog(QDialog):
 
 
 class InputBox(QGroupBox):
+    """
+    This class represents a collection of input widgets that 
+    correspond to a single type of input parameter
+    """
  
     def __init__(self, name):
         super(QGroupBox, self).__init__(name)
@@ -975,6 +983,9 @@ class InputBox(QGroupBox):
 
 
 class InputText(QLineEdit):
+    """
+    This class represents a text box in the GUI
+    """
 
     def __init__(self, parent_, input_name = None):
         super(QLineEdit, self).__init__(parent = parent_)
@@ -994,6 +1005,9 @@ class InputText(QLineEdit):
 
 
 class InputCombo(QComboBox):
+    """
+    This class represents a drop-down box in the GUI
+    """
 
     def __init__(self, parent_, input_name = None):
         super(QComboBox, self).__init__(parent = parent_)
@@ -1010,6 +1024,9 @@ class InputCombo(QComboBox):
 
 
 class InputCheck(QCheckBox):
+    """
+    This class represents a check box in the GUI
+    """
 
     def __init__(self, parent_, input_name = None):
         super(QCheckBox, self).__init__(parent = parent_)
@@ -1027,6 +1044,9 @@ class InputCheck(QCheckBox):
 
 
 class QuantumEspressoInputFile():
+    """
+    This class holds all of the information associated with a QE input file
+    """
  
     def __init__(self):
 
