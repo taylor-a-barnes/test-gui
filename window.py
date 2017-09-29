@@ -92,13 +92,28 @@ class InputBox(QGroupBox):
         
         self.layout = QFormLayout()
 
-        self.widgets = {}
+        self.widgets = []
+
+        self.input_file = input_file
 
 
     def initialize_widgets(self):
         """
         Add GUI elements for each of the input parameters associated with self.group_name
         """
+
+        #for w in self.widgets:
+        #    self.layout.removeWidget(w)
+
+        #reset any widgets
+        #NOTE: need to check whether this clears memory correctly
+        #self.widgets = []
+        
+        #self.layout = QFormLayout()
+
+        #start with a fresh layout
+#        self.clear_layout()
+
         
         if self.group_name == 'basic':
             self.create_basic_box()
@@ -111,68 +126,128 @@ class InputBox(QGroupBox):
         else:
             raise LookupError('Group name not recognized')
 
+        self.apply_layout()
+
+    def apply_layout(self):
+        for w in self.widgets:
+            try: #check if the widget has a label
+                self.layout.addRow( w.label, w)
+            except AttributeError:
+                self.layout.addRow( w )
+
+    def clear_layout(self):
+        """
+        Remove all objects from layout
+        """
+
+        for i in reversed( range( self.layout.count() ) ):
+            w = self.layout.itemAt(i).widget()
+            self.layout.removeWidget( w )
+#            w.setParent( None )
+            w.deleteLater()
+
+        self.widgets = []
+
+    def update_layout(self):
+        
+        print("")
+        for w in self.widgets:
+            
+            print(w.input_name)
+
+        print("")
+
     def create_basic_box(self):
         group_box = self
 
         #title
         widget = InputText( group_box, input_name="title" )
+        widget.label = QLabel("Title:")
         widget.setToolTip('Enter a title for the calculation.\nThis has no impact on the results.')
-        group_box.layout.addRow(QLabel("Title:"), widget)
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #calculation
         widget = InputCombo( group_box, "calculation" )
+        widget.label = QLabel("Calculation:")
         widget.addItem("SCF (Self-Consistent Field)", userData = "scf")
         widget.addItem("NSCF (Non-Self-Consistent Field)", userData = "nscf") #replace with maximum_iterations?
         widget.addItem("Bands", userData = "bands") #how is this different from NSCF?
         widget.addItem("Geometry Relaxation", userData = "relax") #note: includes vc-relax
         widget.addItem("Molecular Dynamics", userData = "md") #note: includes vc-md
-        group_box.layout.addRow(QLabel("Calculation:"), widget)
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #verbosity
         widget = InputCheck( group_box, input_name="verbosity")
-        group_box.layout.addRow(QLabel("Verbosity:"), widget)
+        widget.label = QLabel("Verbosity:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
-        #restart_mode
+        #restart_mode 
         widget = InputCheck( group_box, input_name="restart_mode")
-        group_box.layout.addRow(QLabel("Restart:"), widget)
+        widget.label = QLabel("Restart:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #wf_collect - just set to .true.
         widget = InputCheck( group_box, input_name="wf_collect")
-        group_box.layout.addRow(QLabel("Collect Wavefunctions:"), widget)
+        widget.label = QLabel("Collect Wavefunctions:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #max_seconds
         widget = InputText( group_box, input_name="max_seconds" )
-        group_box.layout.addRow(QLabel("Checkpoint Time (hrs):"), widget)
+        widget.label = QLabel("Checkpoint Time (hrs):")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #etot_conv_thr
         widget = InputText( group_box, input_name="etot_conv_thr" )
-        group_box.layout.addRow(QLabel("Energy Convergece:"), widget)
+        widget.label = QLabel("Energy Convergence:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
-        #force_conv_thr
-        widget = InputText( group_box, input_name="force_conv_thr" )
-        group_box.layout.addRow(QLabel("Force Convergece:"), widget)
+        #forc_conv_thr
+        #try:
+        #    if self.input_file.inputs["calculation"] == "relax":
+        #        print( "Is Relaxation" )
+
+        widget = InputText( group_box, input_name="forc_conv_thr" )
+        widget.label = QLabel("Force Convergence:")
+        group_box.layout.addRow(widget.label, widget)
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
+
+        #except KeyError:
+        #    pass
 
         #disk_io
         widget = InputCombo( group_box, "disk_io" )
+        widget.label = QLabel("Disk IO:")
         widget.addItem("High", userData = "high")
         widget.addItem("Medium", userData = "medium")
         widget.addItem("Low", userData = "low")
         widget.addItem("None", userData = "none")
-        group_box.layout.addRow(QLabel("Disk IO:"), widget)
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
-        button = QPushButton('Next', self)
+
+
+#        widgets = (self.layout.itemAt(i) for i in range(self.layout.count()))
+#        for w in widgets:
+#            print(w)
+#        widgets = [ self.layout.itemAt(i) for i in range(self.layout.count()) ]
+#        widgets[1].undraw()
+#        print(widgets[0].widget_name)
+#        self.widgets[0].undraw()
+
+
+
+        button = InputButton(self, 'Next')
         button.setToolTip('Proceed to the next input set.')
         button.clicked.connect(group_box.on_click)
-        group_box.layout.addRow(button)
+        self.widgets.append(button)
 
         group_box.next_group_box = 'cell'
 
@@ -247,7 +322,7 @@ class InputBox(QGroupBox):
         group_box.layout.addRow(QLabel("esm_nfit:"), widget)
         widget.textChanged.connect( widget.on_text_changed )
 
-        button = QPushButton('Next', self)
+        button = InputButton(self, 'Next')
         button.setToolTip('Proceed to the next input set.')
         button.clicked.connect(group_box.on_click)
         group_box.layout.addRow(button)
@@ -394,7 +469,7 @@ class InputBox(QGroupBox):
 
 
 
-        button = QPushButton('Next', self)
+        button = InputButton(self, 'Next')
         button.setToolTip('Proceed to the next input set.')
         button.clicked.connect(group_box.on_click)
         group_box.layout.addRow(button)
@@ -533,7 +608,7 @@ class InputBox(QGroupBox):
         group_box.layout.addRow(QLabel("Timestep:"), widget)
         widget.textChanged.connect( widget.on_text_changed )
 
-        button = QPushButton('Next', self)
+        button = InputButton(self, 'Next')
         button.setToolTip('Proceed to the next input set.')
         button.clicked.connect(group_box.on_click)
         group_box.layout.addRow(button)
@@ -707,7 +782,7 @@ class InputBox(QGroupBox):
         group_box.layout.addRow(QLabel("monopole:"), widget)
         widget.stateChanged.connect( widget.on_state_changed )
 
-        button = QPushButton('Next', self)
+        button = InputButton(self, 'Next')
         button.setToolTip('Proceed to the next input set.')
         button.clicked.connect(group_box.on_click)
         group_box.layout.addRow(button)
@@ -1107,7 +1182,7 @@ class InputBox(QGroupBox):
         widget.textChanged.connect( widget.on_text_changed )
 
 
-        button = QPushButton('Next', self)
+        button = InputButton(self, 'Next')
         button.setToolTip('Proceed to the next input set.')
         button.clicked.connect(group_box.on_click)
         group_box.layout.addRow(button)
@@ -1119,6 +1194,9 @@ class InputBox(QGroupBox):
     def on_update(self):
 
         print("Box updating")
+
+        #self.initialize_widgets()
+        self.update_layout()
 
     @pyqtSlot()
     def on_click(self):
@@ -1143,10 +1221,20 @@ class InputText(QLineEdit):
 
         self.input_name = input_name
 
+        #conditions under which this text box should be shown
+        self.show_conditions = []
+
+        #initialize the input text
+        try:
+            text = self.parent().input_file.inputs[self.input_name]
+            self.setText(text)
+        except KeyError:
+            pass
+
     @pyqtSlot(str)
     def on_text_changed(self, string):
         
-        input_file.inputs[self.input_name] = string
+        self.parent().input_file.inputs[self.input_name] = string
         self.parent().on_update()
 
         #print(input_file.inputs)
@@ -1167,10 +1255,13 @@ class InputCombo(QComboBox):
 
         self.input_name = input_name
 
+        #conditions under which this drop-down box should be shown
+        self.show_conditions = []
+
     @pyqtSlot(int)
     def on_index_changed(self, index):
         
-        input_file.inputs[self.input_name] = index
+        self.parent().input_file.inputs[self.input_name] = self.itemData(index)
         self.parent().on_update()
 
 
@@ -1187,11 +1278,37 @@ class InputCheck(QCheckBox):
 
         self.input_name = input_name
 
+        #conditions under which this check box should be shown
+        self.show_conditions = []
+
     @pyqtSlot(int)
     def on_state_changed(self, value):
         
-        input_file.inputs[self.input_name] = value
+        self.parent().input_file.inputs[self.input_name] = value
         self.parent().on_update()
+
+
+
+
+
+class InputButton(QPushButton):
+    """
+    This class represents a button in the GUI
+    """
+
+    def __init__(self, parent_, input_name = None):
+        super(QPushButton, self).__init__(input_name, parent = parent_)
+
+        self.input_name = input_name
+
+        #conditions under which this check box should be shown
+        self.show_conditions = []
+
+#    @pyqtSlot(int)
+#    def on_state_changed(self, value):
+#        
+#        self.parent().input_file.inputs[self.input_name] = value
+#        self.parent().on_update()
 
 
 
