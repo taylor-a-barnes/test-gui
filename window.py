@@ -127,13 +127,16 @@ class InputBox(QGroupBox):
             raise LookupError('Group name not recognized')
 
         self.apply_layout()
+        self.update_layout()
 
     def apply_layout(self):
         for w in self.widgets:
+
             try: #check if the widget has a label
                 self.layout.addRow( w.label, w)
             except AttributeError:
                 self.layout.addRow( w )
+            w.shown = True
 
     def clear_layout(self):
         """
@@ -143,19 +146,44 @@ class InputBox(QGroupBox):
         for i in reversed( range( self.layout.count() ) ):
             w = self.layout.itemAt(i).widget()
             self.layout.removeWidget( w )
-#            w.setParent( None )
+            #w.setParent( None )
             w.deleteLater()
 
         self.widgets = []
 
     def update_layout(self):
         
-        print("")
         for w in self.widgets:
-            
-            print(w.input_name)
 
-        print("")
+            should_show = self.check_show_conditions(w)
+
+            if should_show and not w.shown:
+                w.set_visible(True)
+
+            elif not should_show and w.shown:
+                w.set_visible(False)
+
+    def check_show_conditions(self, widget):
+
+        show = True
+
+        for condition in widget.show_conditions:
+            if self.evaluate_condition(condition) == False:
+                show = False
+
+        return show
+
+    def evaluate_condition(self, condition):
+        
+        try:
+            input = input_file.inputs[ condition[0] ]
+        except KeyError:
+            input = None
+
+        if input == condition[2]:
+            return True
+        else:
+            return False
 
     def create_basic_box(self):
         group_box = self
@@ -215,8 +243,8 @@ class InputBox(QGroupBox):
 
         widget = InputText( group_box, input_name="forc_conv_thr" )
         widget.label = QLabel("Force Convergence:")
-        group_box.layout.addRow(widget.label, widget)
         widget.textChanged.connect( widget.on_text_changed )
+        widget.show_conditions.append( ["calculation","==","relax"] )
         self.widgets.append(widget)
 
         #except KeyError:
@@ -1221,6 +1249,12 @@ class InputText(QLineEdit):
 
         self.input_name = input_name
 
+        #does this widget have a label widget?
+        self.widget = None
+
+        #is this widget currently being shown to the user?
+        self.shown = False
+
         #conditions under which this text box should be shown
         self.show_conditions = []
 
@@ -1230,6 +1264,14 @@ class InputText(QLineEdit):
             self.setText(text)
         except KeyError:
             pass
+
+    def set_visible(self, visible):
+        self.setVisible(visible)
+        self.shown = visible
+        
+        if self.label:
+            self.label.setVisible(visible)
+            self.label.shown = visible
 
     @pyqtSlot(str)
     def on_text_changed(self, string):
@@ -1255,8 +1297,22 @@ class InputCombo(QComboBox):
 
         self.input_name = input_name
 
+        #does this widget have a label widget?
+        self.widget = None
+
+        #is this widget currently being shown to the user?
+        self.shown = False
+
         #conditions under which this drop-down box should be shown
         self.show_conditions = []
+
+    def set_visible(self, visible):
+        self.setVisible(visible)
+        self.shown = visible
+        
+        if self.label:
+            self.label.setVisible(visible)
+            self.label.shown = visible
 
     @pyqtSlot(int)
     def on_index_changed(self, index):
@@ -1278,8 +1334,22 @@ class InputCheck(QCheckBox):
 
         self.input_name = input_name
 
+        #does this widget have a label widget?
+        self.widget = None
+
+        #is this widget currently being shown to the user?
+        self.shown = False
+
         #conditions under which this check box should be shown
         self.show_conditions = []
+
+    def set_visible(self, visible):
+        self.setVisible(visible)
+        self.shown = visible
+        
+        if self.label:
+            self.label.setVisible(visible)
+            self.label.shown = visible
 
     @pyqtSlot(int)
     def on_state_changed(self, value):
@@ -1301,8 +1371,22 @@ class InputButton(QPushButton):
 
         self.input_name = input_name
 
+        #does this widget have a label widget?
+        self.widget = None
+
+        #is this widget currently being shown to the user?
+        self.shown = False
+
         #conditions under which this check box should be shown
         self.show_conditions = []
+
+    def set_visible(self, visible):
+        self.setVisible(visible)
+        self.shown = visible
+        
+        if self.label:
+            self.label.setVisible(visible)
+            self.label.shown = visible
 
 #    @pyqtSlot(int)
 #    def on_state_changed(self, value):
