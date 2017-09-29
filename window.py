@@ -17,7 +17,6 @@ class Dialog(QDialog):
 
         self.input_file = input_file
 
-
         self.central_widget = QWidget()
 
         self.setWindowTitle("Quantum ESPRESSO Input Form")
@@ -34,23 +33,9 @@ class Dialog(QDialog):
         self.boxes_widget = QWidget()
         self.boxes_layout = QVBoxLayout(self.boxes_widget)
 
-
-
-
-
-
         #create the box for basic information
-        #basic_box = self.create_form_group_box()
         basic_box = self.create_box('basic')
         self.boxes_layout.addWidget(basic_box)
-
-
-        #create the box for system information
-        #self.system_box = self.create_box("system")
-        #self.boxes_layout.addWidget(self.system_box)
-
-
-
 
 
         self.scroll_area.setWidget(self.boxes_widget)
@@ -62,23 +47,9 @@ class Dialog(QDialog):
 
     def create_box(self,group_name):
 
-#        group_box = QGroupBox("System Information")
-        name = group_name + " Information"
-        group_box = InputBox(name)
+        group_box = InputBox(group_name)
 
-        #set group_box information
-        #group_box.setFixedHeight(200)
-
-        if group_name == 'basic':
-            self.create_basic_box(group_box)
-        elif group_name == 'cell':
-            self.create_cell_box(group_box)
-        elif group_name == 'system':
-            self.create_system_box(group_box)
-        elif group_name == 'print':
-            self.create_print_box(group_box)
-        else:
-            raise LookupError('Group name not recognized')
+        group_box.initialize_widgets()
 
         group_box.setLayout(group_box.layout)
 
@@ -86,7 +57,62 @@ class Dialog(QDialog):
 
 
 
-    def create_basic_box(self,group_box):
+
+
+#not included:
+#nat
+#ntyp
+#london, xdm
+#ortho_para
+
+#probably shouldn't include:
+#space_group, uniqueb, origin_choice, rhombohedral
+
+#not sure where to place:
+#no_t_rev
+#force_symmorphic
+#use_all_frac
+
+#one_atom_occupations
+
+#q2sigma, ecfixed, qcutz
+
+
+class InputBox(QGroupBox):
+    """
+    This class represents a collection of input widgets that 
+    correspond to a single type of input parameter
+    """
+ 
+    def __init__(self, group_name):
+        self.group_name = group_name
+        self.label = self.group_name + " Information"
+
+        super(QGroupBox, self).__init__(self.label)
+        
+        self.layout = QFormLayout()
+
+        self.widgets = {}
+
+
+    def initialize_widgets(self):
+        """
+        Add GUI elements for each of the input parameters associated with self.group_name
+        """
+        
+        if self.group_name == 'basic':
+            self.create_basic_box()
+        elif self.group_name == 'cell':
+            self.create_cell_box()
+        elif self.group_name == 'system':
+            self.create_system_box()
+        elif self.group_name == 'print':
+            self.create_print_box()
+        else:
+            raise LookupError('Group name not recognized')
+
+    def create_basic_box(self):
+        group_box = self
 
         #title
         widget = InputText( group_box, input_name="title" )
@@ -150,15 +176,11 @@ class Dialog(QDialog):
 
         group_box.next_group_box = 'cell'
 
-
-
-
     #--------------------------------------------------------#
     # Cell Inputs
     #--------------------------------------------------------#
-    def create_cell_box(self,group_box):
-
-
+    def create_cell_box(self):
+        group_box = self
 
         #ibrav
         widget = InputCombo( group_box, "ibrav" )
@@ -239,7 +261,8 @@ class Dialog(QDialog):
     #--------------------------------------------------------#
     # System Inputs
     #--------------------------------------------------------#
-    def create_system_box(self,group_box):
+    def create_system_box(self):
+        group_box = self
 
         #nstep
         widget = InputText( group_box, input_name="nstep" )
@@ -382,7 +405,8 @@ class Dialog(QDialog):
     #--------------------------------------------------------#
     # Hubbard Inputs
     #--------------------------------------------------------#
-    def create_hubbard_box(self,group_box):
+    def create_hubbard_box(self):
+        group_box = self
 
         #lda_plus_u
         widget = InputCheck( group_box, input_name="lda_plus_u")
@@ -442,7 +466,8 @@ class Dialog(QDialog):
     #--------------------------------------------------------#
     # VdW Inputs
     #--------------------------------------------------------#
-    def create_vdw_box(self,group_box):
+    def create_vdw_box(self):
+        group_box = self
 
         #vdw_corr
         widget = InputCombo( group_box, "vdw_corr" )
@@ -500,7 +525,8 @@ class Dialog(QDialog):
     #--------------------------------------------------------#
     # MD Inputs
     #--------------------------------------------------------#
-    def create_md_box(self,group_box):
+    def create_md_box(self):
+        group_box = self
 
         #dt
         widget = InputText( group_box, input_name="dt" )
@@ -520,9 +546,10 @@ class Dialog(QDialog):
     #--------------------------------------------------------#
     # Magnetization Inputs
     #--------------------------------------------------------#
-    def create_efield_box(self,group_box):
+    def create_efield_box(self):
+        group_box = self
 
-         #starting_spin_angle
+        #starting_spin_angle
         widget = InputCheck( group_box, input_name="starting_spin_angle")
         group_box.layout.addRow(QLabel("starting_spin_angle:"), widget)
         widget.stateChanged.connect( widget.on_state_changed )
@@ -557,7 +584,8 @@ class Dialog(QDialog):
     #--------------------------------------------------------#
     # Noncollinear Inputs
     #--------------------------------------------------------#
-    def create_noncollinear_box(self,group_box):
+    def create_noncollinear_box(self):
+        group_box = self
 
         #lspinorb
         widget = InputCheck( group_box, input_name="lspinorb")
@@ -580,7 +608,8 @@ class Dialog(QDialog):
     #--------------------------------------------------------#
     # Electric Field Inputs
     #--------------------------------------------------------#
-    def create_efield_box(self,group_box):
+    def create_efield_box(self):
+        group_box = self
 
         #tefield
         widget = InputCheck( group_box, input_name="tefield")
@@ -689,8 +718,9 @@ class Dialog(QDialog):
     #--------------------------------------------------------#
     # Monopole Inputs
     #--------------------------------------------------------#
-    def create_monopole_box(self,group_box):
-        
+    def create_monopole_box(self):
+        group_box = self
+
         #zmon
         widget = InputText( group_box, input_name="zmon" )
         group_box.layout.addRow(QLabel("zmon:"), widget)
@@ -726,7 +756,8 @@ class Dialog(QDialog):
     #--------------------------------------------------------#
     # K-Point Inputs
     #--------------------------------------------------------#
-    def create_kpoint_box(self,group_box):
+    def create_kpoint_box(self):
+        group_box = self
         
         #nosym
         widget = InputText( group_box, input_name="nosym" )
@@ -748,8 +779,9 @@ class Dialog(QDialog):
     #--------------------------------------------------------#
     # Electrons Inputs
     #--------------------------------------------------------#
-    def create_electrons_box(self,group_box):
-        
+    def create_electrons_box(self):
+        group_box = self
+
         #electron_maxstep
         widget = InputText( group_box, input_name="electron_maxstep" )
         group_box.layout.addRow(QLabel("electron_maxstep:"), widget)
@@ -856,7 +888,8 @@ class Dialog(QDialog):
     #--------------------------------------------------------#
     # Ions Inputs
     #--------------------------------------------------------#
-    def create_ions_box(self,group_box):
+    def create_ions_box(self):
+        group_box = self
 
         #ion_dynamics
         widget = InputCombo( group_box, "ion_dynamics" )
@@ -972,7 +1005,8 @@ class Dialog(QDialog):
     #--------------------------------------------------------#
     # Cell Dynamics Inputs
     #--------------------------------------------------------#
-    def create_celld_box(self,group_box):
+    def create_celld_box(self):
+        group_box = self
 
         #cell_dynamics
         widget = InputCombo( group_box, "cell_dynamics" )
@@ -1029,7 +1063,8 @@ class Dialog(QDialog):
     #--------------------------------------------------------#
     # Print Inputs
     #--------------------------------------------------------#
-    def create_print_box(self,group_box):
+    def create_print_box(self):
+        group_box = self
 
         #iprint
         widget = InputText( group_box, input_name="iprint" )
@@ -1081,46 +1116,19 @@ class Dialog(QDialog):
 
 
 
+    def on_update(self):
 
-
-
-#not included:
-#nat
-#ntyp
-#london, xdm
-#ortho_para
-
-#probably shouldn't include:
-#space_group, uniqueb, origin_choice, rhombohedral
-
-#not sure where to place:
-#no_t_rev
-#force_symmorphic
-#use_all_frac
-
-#one_atom_occupations
-
-#q2sigma, ecfixed, qcutz
-
-
-class InputBox(QGroupBox):
-    """
-    This class represents a collection of input widgets that 
-    correspond to a single type of input parameter
-    """
- 
-    def __init__(self, name):
-        super(QGroupBox, self).__init__(name)
-        
-        self.layout = QFormLayout()
+        print("Box updating")
 
     @pyqtSlot()
     def on_click(self):
+
         print('PyQt5 button click')
 
         #create the box for system information
         self.window().system_box = self.window().create_box(self.next_group_box)
         self.window().boxes_layout.addWidget(self.window().system_box)
+
 
 
 
@@ -1139,6 +1147,8 @@ class InputText(QLineEdit):
     def on_text_changed(self, string):
         
         input_file.inputs[self.input_name] = string
+        self.parent().on_update()
+
         #print(input_file.inputs)
 
 
@@ -1161,6 +1171,7 @@ class InputCombo(QComboBox):
     def on_index_changed(self, index):
         
         input_file.inputs[self.input_name] = index
+        self.parent().on_update()
 
 
 
@@ -1180,6 +1191,7 @@ class InputCheck(QCheckBox):
     def on_state_changed(self, value):
         
         input_file.inputs[self.input_name] = value
+        self.parent().on_update()
 
 
 
