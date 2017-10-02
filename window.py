@@ -23,6 +23,8 @@ class Dialog(QDialog):
  
         self.main_layout = QVBoxLayout(self.central_widget)
 
+        #list of all associated group boxes
+        self.group_boxes = []
 
         #inside of the main layout is a scroll area
         self.scroll_area = QScrollArea(self.central_widget)
@@ -53,7 +55,15 @@ class Dialog(QDialog):
 
         group_box.setLayout(group_box.layout)
 
+        self.group_boxes.append(group_box)
+
         return group_box
+
+    def on_update(self):
+        
+        for group_box in self.group_boxes:
+            group_box.update_layout()
+
 
 
 
@@ -229,48 +239,6 @@ class InputBox(QGroupBox):
         widget.currentIndexChanged.connect( widget.on_index_changed )
         self.widgets.append(widget)
 
-        #etot_conv_thr
-        widget = InputText( group_box, input_name="etot_conv_thr" )
-        widget.label = QLabel("Energy Convergence:")
-        widget.textChanged.connect( widget.on_text_changed )
-        self.widgets.append(widget)
-
-        #forc_conv_thr
-        #try:
-        #    if self.input_file.inputs["calculation"] == "relax":
-        #        print( "Is Relaxation" )
-
-        widget = InputText( group_box, input_name="forc_conv_thr" )
-        widget.label = QLabel("Force Convergence:")
-        widget.textChanged.connect( widget.on_text_changed )
-        widget.show_conditions.append( ["calculation","==","relax"] )
-        self.widgets.append(widget)
-
-        #except KeyError:
-        #    pass
-
-        #disk_io
-        widget = InputCombo( group_box, "disk_io" )
-        widget.label = QLabel("Disk IO:")
-        widget.addItem("High", userData = "high")
-        widget.addItem("Medium", userData = "medium")
-        widget.addItem("Low", userData = "low")
-        widget.addItem("None", userData = "none")
-        widget.currentIndexChanged.connect( widget.on_index_changed )
-        self.widgets.append(widget)
-
-
-
-#        widgets = (self.layout.itemAt(i) for i in range(self.layout.count()))
-#        for w in widgets:
-#            print(w)
-#        widgets = [ self.layout.itemAt(i) for i in range(self.layout.count()) ]
-#        widgets[1].undraw()
-#        print(widgets[0].widget_name)
-#        self.widgets[0].undraw()
-
-
-
         button = InputButton(self, 'Next')
         button.setToolTip('Proceed to the next input set.')
         button.clicked.connect(group_box.on_click)
@@ -373,6 +341,19 @@ class InputBox(QGroupBox):
     #--------------------------------------------------------#
     def create_system_box(self):
         group_box = self
+
+        #etot_conv_thr
+        widget = InputText( group_box, input_name="etot_conv_thr" )
+        widget.label = QLabel("Energy Convergence:")
+        widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
+
+        #forc_conv_thr
+        widget = InputText( group_box, input_name="forc_conv_thr" )
+        widget.label = QLabel("Force Convergence:")
+        widget.textChanged.connect( widget.on_text_changed )
+        widget.show_conditions.append( ["calculation","==","relax"] )
+        self.widgets.append(widget)
 
         #nstep
         widget = InputText( group_box, input_name="nstep" )
@@ -1368,6 +1349,16 @@ class InputBox(QGroupBox):
     def create_print_box(self):
         group_box = self
 
+        #disk_io
+        widget = InputCombo( group_box, "disk_io" )
+        widget.label = QLabel("Disk IO:")
+        widget.addItem("High", userData = "high")
+        widget.addItem("Medium", userData = "medium")
+        widget.addItem("Low", userData = "low")
+        widget.addItem("None", userData = "none")
+        widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
+
         #verbosity
         widget = InputCheck( group_box, input_name="verbosity")
         widget.label = QLabel("Verbosity:")
@@ -1454,8 +1445,9 @@ class InputBox(QGroupBox):
 
         print("Box updating")
 
-        #self.initialize_widgets()
-        self.update_layout()
+        self.window().on_update()
+
+        #self.update_layout()
 
     @pyqtSlot()
     def on_click(self):
