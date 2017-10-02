@@ -209,14 +209,30 @@ class InputBox(QGroupBox):
     def evaluate_condition(self, condition):
         
         try:
-            input = input_file.inputs[ condition[0] ]
-        except KeyError:
-            input = None
+        
+            #evaluate this condition
+            try:
+                input = input_file.inputs[ condition[0] ]
+            except KeyError:
+                input = None
 
-        if input == condition[2]:
-            return True
-        else:
-            return False
+            if input == condition[2]:
+                return True
+            else:
+                return False
+
+        except TypeError: #the condition must be a list of conditions
+            
+            #evaluate each condition in the list
+            c1 = self.evaluate_condition(condition[0])
+            c2 = self.evaluate_condition(condition[2])
+            
+            if condition[1] == "or":
+                #print("HERE: " + str(c1) + " " + str(c2) + " " + str(c1 or c2))
+                return (c1 or c2)
+
+            elif condition[1] == "and":
+                return (c1 and c2)
 
     def create_basic_box(self):
         group_box = self
@@ -295,11 +311,11 @@ class InputBox(QGroupBox):
 
         #assume_isolated
         widget = InputCombo( group_box, "assume_isolated" )
-        widget.addItem("None", userData = "none")
+        widget.addItem("Periodic", userData = "none")
         widget.addItem("ESM (Effective Screening Medium)", userData = "esm")
-        widget.addItem("Makov-Payne", userData = "makov-payne")
-        widget.addItem("Martyna-Tuckerman", userData = "martyna-tuckerman")
-        widget.label = QLabel("assume_isolated:")
+        widget.addItem("Vacuum (Makov-Payne Method)", userData = "makov-payne")
+        widget.addItem("Vacuum (Martyna-Tuckerman Method)", userData = "martyna-tuckerman")
+        widget.label = QLabel("Cell Periodicity:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
         self.widgets.append(widget)
 
@@ -309,20 +325,31 @@ class InputBox(QGroupBox):
         widget.addItem("Vacuum-Slab-Vacuum", userData = "bc1")
         widget.addItem("Metal-Slab-Metal", userData = "bc2")
         widget.addItem("Vacuum-Slab-Metal", userData = "bc3")
-        widget.label = QLabel("esm_bc:")
+        widget.label = QLabel("ESM Boundary Conditions:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        widget.show_conditions.append( ["assume_isolated","==","esm"] )
         self.widgets.append(widget)
 
         #esm_w
         widget = InputText( group_box, input_name="esm_w" )
-        widget.label = QLabel("esm_w:")
+        widget.label = QLabel("Effective Screening Region Offset:")
         widget.textChanged.connect( widget.on_text_changed )
+        widget.show_conditions.append( ["assume_isolated","==","esm"] )
+        self.widgets.append(widget)
+
+        #esm_efield
+        widget = InputText( group_box, input_name="esm_efield" )
+        widget.label = QLabel("ESM Electric Field (Ry/a.u.):")
+        widget.textChanged.connect( widget.on_text_changed )
+        widget.show_conditions.append( ["assume_isolated","==","esm"] )
+        widget.show_conditions.append( ["esm_bc","==","bc2"] )
         self.widgets.append(widget)
 
         #esm_nfit
-        widget = InputText( group_box, input_name="esm_nfit" )
+        widget = InputText( group_box, input_name="Number of ESM Grid Points" )
         widget.label = QLabel("esm_nfit:")
         widget.textChanged.connect( widget.on_text_changed )
+        widget.show_conditions.append( ["assume_isolated","==","esm"] )
         self.widgets.append(widget)
 
         button = InputButton(self, 'Next')
@@ -342,6 +369,16 @@ class InputBox(QGroupBox):
     def create_system_box(self):
         group_box = self
 
+        #input_dft
+        widget = InputCombo( group_box, "input_dft" )
+        widget.addItem("BLYP", userData = "blyp")
+        widget.addItem("PBE", userData = "pbe")
+        widget.addItem("PBE0", userData = "pbe0")
+        widget.addItem("HSE", userData = "hse")
+        widget.label = QLabel("DFT Functional:")
+        widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
+
         #etot_conv_thr
         widget = InputText( group_box, input_name="etot_conv_thr" )
         widget.label = QLabel("Energy Convergence:")
@@ -359,6 +396,7 @@ class InputBox(QGroupBox):
         widget = InputText( group_box, input_name="nstep" )
         widget.label = QLabel("nstep:")
         widget.textChanged.connect( widget.on_text_changed )
+        widget.show_conditions.append( [ ["calculation","==","relax"], "or", ["calculation","==","md"] ] )
         self.widgets.append(widget)
 
         #nbnd
@@ -440,16 +478,6 @@ class InputBox(QGroupBox):
         widget.addItem("Spin-Polarized", userData = "2")
         widget.addItem("Noncollinear Spin-Polarized", userData = "4")
         widget.label = QLabel("Spin Polarization:")
-        widget.currentIndexChanged.connect( widget.on_index_changed )
-        self.widgets.append(widget)
-
-        #input_dft
-        widget = InputCombo( group_box, "input_dft" )
-        widget.addItem("BLYP", userData = "blyp")
-        widget.addItem("PBE", userData = "pbe")
-        widget.addItem("PBE0", userData = "pbe0")
-        widget.addItem("HSE", userData = "hse")
-        widget.label = QLabel("DFT Functional:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
         self.widgets.append(widget)
 
