@@ -66,6 +66,7 @@ class Dialog(QDialog):
 #ortho_para
 
 #probably shouldn't include:
+#title
 #space_group, uniqueb, origin_choice, rhombohedral
 
 #not sure where to place:
@@ -119,12 +120,34 @@ class InputBox(QGroupBox):
             self.create_basic_box()
         elif self.group_name == 'cell':
             self.create_cell_box()
+        elif self.group_name == 'hubbard':
+            self.create_hubbard_box()
         elif self.group_name == 'system':
             self.create_system_box()
+        elif self.group_name == 'vdw':
+            self.create_vdw_box()
+        elif self.group_name == 'md':
+            self.create_md_box()
+        elif self.group_name == 'magnetization':
+            self.create_magnetization_box()
+        elif self.group_name == 'noncollinear':
+            self.create_noncollinear_box()
+        elif self.group_name == 'efield':
+            self.create_efield_box()
+        elif self.group_name == 'monopole':
+            self.create_monopole_box()
+        elif self.group_name == 'kpoint':
+            self.create_kpoint_box()
+        elif self.group_name == 'electrons':
+            self.create_electrons_box()
+        elif self.group_name == 'ions':
+            self.create_ions_box()
+        elif self.group_name == 'cell dynamics':
+            self.create_celld_box()
         elif self.group_name == 'print':
             self.create_print_box()
         else:
-            raise LookupError('Group name not recognized')
+            raise LookupError('Group name not recognized: ' + str(self.group_name))
 
         self.apply_layout()
         self.update_layout()
@@ -189,11 +212,11 @@ class InputBox(QGroupBox):
         group_box = self
 
         #title
-        widget = InputText( group_box, input_name="title" )
-        widget.label = QLabel("Title:")
-        widget.setToolTip('Enter a title for the calculation.\nThis has no impact on the results.')
-        widget.textChanged.connect( widget.on_text_changed )
-        self.widgets.append(widget)
+#        widget = InputText( group_box, input_name="title" )
+#        widget.label = QLabel("Title:")
+#        widget.setToolTip('Enter a title for the calculation.\nThis has no impact on the results.')
+#        widget.textChanged.connect( widget.on_text_changed )
+#        self.widgets.append(widget)
 
         #calculation
         widget = InputCombo( group_box, "calculation" )
@@ -204,30 +227,6 @@ class InputBox(QGroupBox):
         widget.addItem("Geometry Relaxation", userData = "relax") #note: includes vc-relax
         widget.addItem("Molecular Dynamics", userData = "md") #note: includes vc-md
         widget.currentIndexChanged.connect( widget.on_index_changed )
-        self.widgets.append(widget)
-
-        #verbosity
-        widget = InputCheck( group_box, input_name="verbosity")
-        widget.label = QLabel("Verbosity:")
-        widget.stateChanged.connect( widget.on_state_changed )
-        self.widgets.append(widget)
-
-        #restart_mode 
-        widget = InputCheck( group_box, input_name="restart_mode")
-        widget.label = QLabel("Restart:")
-        widget.stateChanged.connect( widget.on_state_changed )
-        self.widgets.append(widget)
-
-        #wf_collect - just set to .true.
-        widget = InputCheck( group_box, input_name="wf_collect")
-        widget.label = QLabel("Collect Wavefunctions:")
-        widget.stateChanged.connect( widget.on_state_changed )
-        self.widgets.append(widget)
-
-        #max_seconds
-        widget = InputText( group_box, input_name="max_seconds" )
-        widget.label = QLabel("Checkpoint Time (hrs):")
-        widget.textChanged.connect( widget.on_text_changed )
         self.widgets.append(widget)
 
         #etot_conv_thr
@@ -304,23 +303,27 @@ class InputBox(QGroupBox):
         widget.addItem("Monoclinic P, unique axis b", userData = "-12")
         widget.addItem("Base-Centered Monoclinic", userData = "13")
         widget.addItem("Triclinic", userData = "14")
-        group_box.layout.addRow(QLabel("Lattice Type:"), widget)
+        widget.label = QLabel("Lattice Type:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
         
         #v1
         widget = InputText( group_box, input_name="v1" )
-        group_box.layout.addRow(QLabel("v1:"), widget)
+        widget.label = QLabel("v1:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #v2
         widget = InputText( group_box, input_name="v2" )
-        group_box.layout.addRow(QLabel("v2:"), widget)
+        widget.label = QLabel("v2:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #v3
         widget = InputText( group_box, input_name="v3" )
-        group_box.layout.addRow(QLabel("v3:"), widget)
+        widget.label = QLabel("v3:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #assume_isolated
         widget = InputCombo( group_box, "assume_isolated" )
@@ -328,8 +331,9 @@ class InputBox(QGroupBox):
         widget.addItem("ESM (Effective Screening Medium)", userData = "esm")
         widget.addItem("Makov-Payne", userData = "makov-payne")
         widget.addItem("Martyna-Tuckerman", userData = "martyna-tuckerman")
-        group_box.layout.addRow(QLabel("assume_isolated:"), widget)
+        widget.label = QLabel("assume_isolated:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #esm_bc
         widget = InputCombo( group_box, "esm_bc" )
@@ -337,23 +341,26 @@ class InputBox(QGroupBox):
         widget.addItem("Vacuum-Slab-Vacuum", userData = "bc1")
         widget.addItem("Metal-Slab-Metal", userData = "bc2")
         widget.addItem("Vacuum-Slab-Metal", userData = "bc3")
-        group_box.layout.addRow(QLabel("esm_bc:"), widget)
+        widget.label = QLabel("esm_bc:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #esm_w
         widget = InputText( group_box, input_name="esm_w" )
-        group_box.layout.addRow(QLabel("esm_w:"), widget)
+        widget.label = QLabel("esm_w:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #esm_nfit
         widget = InputText( group_box, input_name="esm_nfit" )
-        group_box.layout.addRow(QLabel("esm_nfit:"), widget)
+        widget.label = QLabel("esm_nfit:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         button = InputButton(self, 'Next')
         button.setToolTip('Proceed to the next input set.')
         button.clicked.connect(group_box.on_click)
-        group_box.layout.addRow(button)
+        self.widgets.append(button)
 
         group_box.next_group_box = 'system'
 
@@ -369,41 +376,48 @@ class InputBox(QGroupBox):
 
         #nstep
         widget = InputText( group_box, input_name="nstep" )
-        group_box.layout.addRow(QLabel("nstep:"), widget)
+        widget.label = QLabel("nstep:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #nbnd
         widget = InputText( group_box, input_name="nbnd" )
-        group_box.layout.addRow(QLabel("Number of Bands:"), widget)
+        widget.label = QLabel("Number of Bands:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #tot_charge
         widget = InputText( group_box, input_name="tot_charge" )
-        group_box.layout.addRow(QLabel("Charge:"), widget)
+        widget.label = QLabel("Charge:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #tot_magnetization
         widget = InputText( group_box, input_name="tot_magnetization" )
-        group_box.layout.addRow(QLabel("tot_magnetization:"), widget)
+        widget.label = QLabel("tot_magnetization:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #ecutwfc
         widget = InputText( group_box, input_name="ecutwfc" )
-        group_box.layout.addRow(QLabel("ecutwfc:"), widget)
+        widget.label = QLabel("ecutwfc:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #ecutrho
         widget = InputText( group_box, input_name="ecutrho" )
-        group_box.layout.addRow(QLabel("ecutrho:"), widget)
+        widget.label = QLabel("ecutrho:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #nr1, nr2, and nr3
         #nr1s, nr2s, and nr3s
 
         #ecutfock
         widget = InputText( group_box, input_name="ecutfock" )
-        group_box.layout.addRow(QLabel("ecutfock:"), widget)
+        widget.label = QLabel("ecutfock:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #occupations
         widget = InputCombo( group_box, "occupations" )
@@ -413,8 +427,9 @@ class InputBox(QGroupBox):
         widget.addItem("Tetrahedron (Kawamura Method)", userData = "tetrahedra_opt")
         widget.addItem("Fixed", userData = "fixed")
         widget.addItem("Custom", userData = "from_input")
-        group_box.layout.addRow(QLabel("occupations:"), widget)
+        widget.label = QLabel("occupations:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
 #NOTE: for occupations, default to 'smearing', unless doing DOS or phonons, in which case use 'tetrahedra_opt' - the Kawamura Method
         
@@ -424,15 +439,17 @@ class InputBox(QGroupBox):
         widget.addItem("Methfessel-Paxton", userData = "methfessel-paxton")
         widget.addItem("Marzari-Vanderbilt", userData = "marzari-vanderbilt")
         widget.addItem("Fermi-Dirac", userData = "Fermi-Dirac")
-        group_box.layout.addRow(QLabel("Smearing Method:"), widget)
+        widget.label = QLabel("Smearing Method:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
         
 #NOTE: default to Marzari-Vanderbilt 'cold smearing'
 
         #degauss
         widget = InputText( group_box, input_name="degauss" )
-        group_box.layout.addRow(QLabel("degauss:"), widget)
+        widget.label = QLabel("degauss:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
 #NOTE: degauss has suggested values of 0.06-0.10 Ry
 
@@ -441,8 +458,9 @@ class InputBox(QGroupBox):
         widget.addItem("Non-Polarized", userData = "1")
         widget.addItem("Spin-Polarized", userData = "2")
         widget.addItem("Noncollinear Spin-Polarized", userData = "4")
-        group_box.layout.addRow(QLabel("Spin Polarization:"), widget)
+        widget.label = QLabel("Spin Polarization:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #input_dft
         widget = InputCombo( group_box, "input_dft" )
@@ -450,38 +468,45 @@ class InputBox(QGroupBox):
         widget.addItem("PBE", userData = "pbe")
         widget.addItem("PBE0", userData = "pbe0")
         widget.addItem("HSE", userData = "hse")
-        group_box.layout.addRow(QLabel("DFT Functional:"), widget)
+        widget.label = QLabel("DFT Functional:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #exx_fraction
         widget = InputText( group_box, input_name="exx_fraction" )
-        group_box.layout.addRow(QLabel("exx_fraction:"), widget)
+        widget.label = QLabel("exx_fraction:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #screening_parameter
         widget = InputText( group_box, input_name="screening_parameter" )
-        group_box.layout.addRow(QLabel("screening_parameter:"), widget)
+        widget.label = QLabel("screening_parameter:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #exxdiv_treatment
         widget = InputText( group_box, input_name="exxdiv_treatment" )
-        group_box.layout.addRow(QLabel("exxdiv_treatment:"), widget)
+        widget.label = QLabel("exxdiv_treatment:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #x_gamma_extrapolation
         widget = InputText( group_box, input_name="x_gamma_extrapolation" )
-        group_box.layout.addRow(QLabel("x_gamma_extrapolation:"), widget)
+        widget.label = QLabel("x_gamma_extrapolation:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #ecutvcut
         widget = InputText( group_box, input_name="ecutvcut" )
-        group_box.layout.addRow(QLabel("ecutvcut:"), widget)
+        widget.label = QLabel("ecutvcut:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #nqx1, nqx2, nqx3
         widget = InputText( group_box, input_name="nqx1" )
-        group_box.layout.addRow(QLabel("nqx1, nqx2, nqx3:"), widget)
+        widget.label = QLabel("nqx1, nqx2, nqx3:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
 
 
@@ -492,17 +517,19 @@ class InputBox(QGroupBox):
         #--------------------------------------------------------#
 
         #starting_magnetization
-        widget = QLineEdit()
-        group_box.layout.addRow(QLabel("starting_magnetization:"), widget)
+        widget = InputText( group_box, input_name="starting_magnetization" )
+        widget.label = QLabel("starting_magnetization:")
+        widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
 
 
         button = InputButton(self, 'Next')
         button.setToolTip('Proceed to the next input set.')
         button.clicked.connect(group_box.on_click)
-        group_box.layout.addRow(button)
+        self.widgets.append(button)
 
-        group_box.next_group_box = 'print'
+        group_box.next_group_box = 'hubbard'
 
 
     #--------------------------------------------------------#
@@ -513,15 +540,17 @@ class InputBox(QGroupBox):
 
         #lda_plus_u
         widget = InputCheck( group_box, input_name="lda_plus_u")
-        group_box.layout.addRow(QLabel("DFT+U:"), widget)
+        widget.label = QLabel("DFT+U:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
 #NOTE: Instead of having a checkbox, just turn DFT+U on if a non-zero U is applied to any species
 
         #lda_plus_u_kind
         widget = InputCheck( group_box, input_name="lda_plus_u_kind")
-        group_box.layout.addRow(QLabel("DFT+U+J:"), widget)
+        widget.label = QLabel("DFT+U+J:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
 #NOTE: Instead of having a checkbox, just turn DFT+U+J on if a non-zero J is applied to any species
 
@@ -532,36 +561,57 @@ class InputBox(QGroupBox):
         widget.addItem("Norm-Atomic", userData = "norm-atomic")
         widget.addItem("File", userData = "file")
         widget.addItem("Pseudo", userData = "pseudo")
-        group_box.layout.addRow(QLabel("DFT Functional:"), widget)
+        widget.label = QLabel("DFT Functional:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #starting_ns_eigenvalue(m,ispin,l)
-        widget = QLineEdit()
-        group_box.layout.addRow(QLabel("starting_ns_eigenvalue:"), widget)
+        widget = InputCheck( group_box, input_name="starting_ns_eigenvalue")
+        widget.label = QLabel("starting_ns_eigenvalue:")
+        widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #--------------------------------------------------------#
         # Per-species information
         #--------------------------------------------------------#
 
         #Hubbard_U
-        widget = QLineEdit()
-        group_box.layout.addRow(QLabel("U:"), widget)
+        widget = InputCheck( group_box, input_name="U")
+        widget.label = QLabel("U:")
+        widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #Hubbard_J0
-        widget = QLineEdit()
-        group_box.layout.addRow(QLabel("J0:"), widget)
+        widget = InputCheck( group_box, input_name="J0")
+        widget.label = QLabel("J0:")
+        widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #Hubbard_alpha
-        widget = QLineEdit()
-        group_box.layout.addRow(QLabel("alpha:"), widget)
+        widget = InputCheck( group_box, input_name="alpha")
+        widget.label = QLabel("alpha:")
+        widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #Hubbard_beta
-        widget = QLineEdit()
-        group_box.layout.addRow(QLabel("beta:"), widget)
+        widget = InputCheck( group_box, input_name="beta")
+        widget.label = QLabel("beta:")
+        widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #Hubbard_J
-        widget = QLineEdit()
-        group_box.layout.addRow(QLabel("J:"), widget)
+        widget = InputCheck( group_box, input_name="J")
+        widget.label = QLabel("J:")
+        widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
+
+        button = InputButton(self, 'Next')
+        button.setToolTip('Proceed to the next input set.')
+        button.clicked.connect(group_box.on_click)
+        self.widgets.append(button)
+
+
+        group_box.next_group_box = 'vdw'
 
 
 
@@ -578,50 +628,70 @@ class InputBox(QGroupBox):
         widget.addItem("Grimme-D2", userData = "grimme-d2")
         widget.addItem("Tkatchenko-Scheffler", userData = "tkatchenko-scheffler")
         widget.addItem("XDM", userData = "xdm")
-        group_box.layout.addRow(QLabel("Van der Waals Correction:"), widget)
+        widget.label = QLabel("Van der Waals Correction:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #london_rcut
         widget = InputText( group_box, input_name="london_rcut" )
-        group_box.layout.addRow(QLabel("london_rcut:"), widget)
+        widget.label = QLabel("london_rcut:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #ts_vdw_econv_thr
         widget = InputText( group_box, input_name="ts_vdw_econv_thr" )
-        group_box.layout.addRow(QLabel("ts_vdw_econv_thr:"), widget)
+        widget.label = QLabel("ts_vdw_econv_thr:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #ts_vdw_isolated
         widget = InputText( group_box, input_name="ts_vdw_isolated" )
-        group_box.layout.addRow(QLabel("ts_vdw_isolated:"), widget)
+        widget.label = QLabel("ts_vdw_isolated:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #london_s6
         widget = InputText( group_box, input_name="london_s6" )
-        group_box.layout.addRow(QLabel("london_s6:"), widget)
+        widget.label = QLabel("london_s6:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #xdm_a1
         widget = InputText( group_box, input_name="xdm_a1" )
-        group_box.layout.addRow(QLabel("xdm_a1:"), widget)
+        widget.label = QLabel("xdm_a1:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #xdm_a2
         widget = InputText( group_box, input_name="xdm_a2" )
-        group_box.layout.addRow(QLabel("xdm_a2:"), widget)
+        widget.label = QLabel("xdm_a2:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #--------------------------------------------------------#
         # Per-species information
         #--------------------------------------------------------#
 
         #london_c6
-        widget = QLineEdit()
-        group_box.layout.addRow(QLabel("london_c6:"), widget)
+        widget = InputText( group_box, input_name="london_c6" )
+        widget.label = QLabel("london_c6:")
+        widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #london_rvdw
-        widget = QLineEdit()
-        group_box.layout.addRow(QLabel("london_rvdw:"), widget)
+        widget = InputText( group_box, input_name="london_rvdw" )
+        widget.label = QLabel("london_rvdw:")
+        widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
+
+
+        button = InputButton(self, 'Next')
+        button.setToolTip('Proceed to the next input set.')
+        button.clicked.connect(group_box.on_click)
+        self.widgets.append(button)
+
+
+        group_box.next_group_box = 'md'
 
 
 
@@ -633,15 +703,16 @@ class InputBox(QGroupBox):
 
         #dt
         widget = InputText( group_box, input_name="dt" )
-        group_box.layout.addRow(QLabel("Timestep:"), widget)
+        widget.label = QLabel("dt:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         button = InputButton(self, 'Next')
         button.setToolTip('Proceed to the next input set.')
         button.clicked.connect(group_box.on_click)
-        group_box.layout.addRow(button)
+        self.widgets.append(button)
 
-        group_box.next_group_box = 'print'
+        group_box.next_group_box = 'magnetization'
 
 
 
@@ -649,13 +720,14 @@ class InputBox(QGroupBox):
     #--------------------------------------------------------#
     # Magnetization Inputs
     #--------------------------------------------------------#
-    def create_efield_box(self):
+    def create_magnetization_box(self):
         group_box = self
 
         #starting_spin_angle
         widget = InputCheck( group_box, input_name="starting_spin_angle")
-        group_box.layout.addRow(QLabel("starting_spin_angle:"), widget)
+        widget.label = QLabel("starting_spin_angle:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #constrainted_magnetization
         widget = InputCombo( group_box, "constrained_magnetization" )
@@ -663,24 +735,35 @@ class InputBox(QGroupBox):
         widget.addItem("Total", userData = "total")
         widget.addItem("Atomic", userData = "atomic")
         widget.addItem("Total Direction", userData = "total_direction")
-        widget.addItem("Atomic Direction", userData = "atomic_direction")
-        group_box.layout.addRow(QLabel("constrained_magnetization:"), widget)
+        widget.addItem("Atomic Direction", userData = "atomic_direction") 
+        widget.label = QLabel("constrained_magnetization:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #fixed_magnetization
         widget = InputText( group_box, input_name="fixed_magnetization" )
-        group_box.layout.addRow(QLabel("fixed_magnetization:"), widget)
+        widget.label = QLabel("fixed_magnetization:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #lambda
         widget = InputText( group_box, input_name="lambda" )
-        group_box.layout.addRow(QLabel("lambda:"), widget)
+        widget.label = QLabel("lambda:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #report
         widget = InputText( group_box, input_name="report" )
-        group_box.layout.addRow(QLabel("report:"), widget)
+        widget.label = QLabel("report:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
+
+        button = InputButton(self, 'Next')
+        button.setToolTip('Proceed to the next input set.')
+        button.clicked.connect(group_box.on_click)
+        self.widgets.append(button)
+
+        group_box.next_group_box = 'noncollinear'
 
 
 
@@ -692,20 +775,33 @@ class InputBox(QGroupBox):
 
         #lspinorb
         widget = InputCheck( group_box, input_name="lspinorb")
-        group_box.layout.addRow(QLabel("lspinorb:"), widget)
+        widget.label = QLabel("lspinorb:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
         
         #--------------------------------------------------------#
         # Per-species information
         #--------------------------------------------------------#
 
         #angle1
-        widget = QLineEdit()
-        group_box.layout.addRow(QLabel("angle1:"), widget)
+        widget = InputCheck( group_box, input_name="angle1")
+        widget.label = QLabel("angle1:")
+        widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #angle2
-        widget = QLineEdit()
-        group_box.layout.addRow(QLabel("angle2:"), widget)
+        widget = InputCheck( group_box, input_name="angle2")
+        widget.label = QLabel("angle2:")
+        widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
+
+        button = InputButton(self, 'Next')
+        button.setToolTip('Proceed to the next input set.')
+        button.clicked.connect(group_box.on_click)
+        self.widgets.append(button)
+
+        group_box.next_group_box = 'efield'
+
 
 
     #--------------------------------------------------------#
@@ -716,106 +812,124 @@ class InputBox(QGroupBox):
 
         #tefield
         widget = InputCheck( group_box, input_name="tefield")
-        group_box.layout.addRow(QLabel("Saw-Like Electric Field:"), widget)
+        widget.label = QLabel("Saw-Like Electric Field:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
                 
         #edir
         widget = InputText( group_box, input_name="edir" )
-        group_box.layout.addRow(QLabel("edir:"), widget)
+        widget.label = QLabel("edir:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #emaxpos
         widget = InputText( group_box, input_name="emaxpos" )
-        group_box.layout.addRow(QLabel("emaxpos:"), widget)
+        widget.label = QLabel("emaxpos:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #eopreg
         widget = InputText( group_box, input_name="eopreg" )
-        group_box.layout.addRow(QLabel("eopreg:"), widget)
+        widget.label = QLabel("eopreg:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #eamp
         widget = InputText( group_box, input_name="eamp" )
-        group_box.layout.addRow(QLabel("eamp:"), widget)
+        widget.label = QLabel("eamp:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #dipfield
         widget = InputCheck( group_box, input_name="dipfield")
-        group_box.layout.addRow(QLabel("Dipole Correction:"), widget)
+        widget.label = QLabel("Dipole Correction:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #lefield
         widget = InputCheck( group_box, input_name="lefield")
-        group_box.layout.addRow(QLabel("Homogeneous Electric Field:"), widget)
+        widget.label = QLabel("Homegeneous Electric Field:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #efield
         widget = InputText( group_box, input_name="efield" )
-        group_box.layout.addRow(QLabel("efield:"), widget)
+        widget.label = QLabel("efield:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #efield_cart(3)
         widget = InputText( group_box, input_name="efield_cart" )
-        group_box.layout.addRow(QLabel("efield_cart:"), widget)
+        widget.label = QLabel("efield_cart:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #efield_phase
         widget = InputCombo( group_box, "efield_phase" )
         widget.addItem("Read", userData = "read")
         widget.addItem("Write", userData = "write")
         widget.addItem("None", userData = "none")
-        group_box.layout.addRow(QLabel("efield_phase:"), widget)
+        widget.label = QLabel("efield_phase:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #nberrycyc
         widget = InputText( group_box, input_name="nberrycyc" )
-        group_box.layout.addRow(QLabel("nberrycyc:"), widget)
+        widget.label = QLabel("nberrycyc:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #lorbm
         widget = InputCheck( group_box, input_name="lorbm")
-        group_box.layout.addRow(QLabel("lorbm:"), widget)
+        widget.label = QLabel("lorbm:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #lberry
         widget = InputCheck( group_box, input_name="lberry")
-        group_box.layout.addRow(QLabel("lberry:"), widget)
+        widget.label = QLabel("lberry:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #gdir
         widget = InputCombo( group_box, "gdir" )
         widget.addItem("First Reciprocal Lattice Vector", userData = "1")
         widget.addItem("Second Reciprocal Lattice Vector", userData = "2")
         widget.addItem("Third Reciprocal Lattice Vector", userData = "3")
-        group_box.layout.addRow(QLabel("gdir:"), widget)
+        widget.label = QLabel("gdir:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #nppstr
         widget = InputText( group_box, input_name="nppstr" )
-        group_box.layout.addRow(QLabel("nppstr:"), widget)
+        widget.label = QLabel("nppstr:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #lfcpopt
         widget = InputCheck( group_box, input_name="lfcpopt")
-        group_box.layout.addRow(QLabel("lfcpopt:"), widget)
+        widget.label = QLabel("lfcpopt:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #fcp_mu
         widget = InputText( group_box, input_name="fcp_mu" )
-        group_box.layout.addRow(QLabel("fcp_mu:"), widget)
+        widget.label = QLabel("fcp_mu:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #monopole
         widget = InputCheck( group_box, input_name="monopole")
-        group_box.layout.addRow(QLabel("monopole:"), widget)
+        widget.label = QLabel("monopole:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         button = InputButton(self, 'Next')
         button.setToolTip('Proceed to the next input set.')
         button.clicked.connect(group_box.on_click)
-        group_box.layout.addRow(button)
+        self.widgets.append(button)
 
-        group_box.next_group_box = 'print'
+        group_box.next_group_box = 'monopole'
 
 
     #--------------------------------------------------------#
@@ -826,33 +940,46 @@ class InputBox(QGroupBox):
 
         #zmon
         widget = InputText( group_box, input_name="zmon" )
-        group_box.layout.addRow(QLabel("zmon:"), widget)
+        widget.label = QLabel("zmon:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #realxz
         widget = InputCheck( group_box, input_name="realxz")
-        group_box.layout.addRow(QLabel("realxz:"), widget)
+        widget.label = QLabel("realxz:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #block
         widget = InputCheck( group_box, input_name="block")
-        group_box.layout.addRow(QLabel("block:"), widget)
+        widget.label = QLabel("block:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #block_1
         widget = InputText( group_box, input_name="block_1" )
-        group_box.layout.addRow(QLabel("block_1:"), widget)
+        widget.label = QLabel("block_1:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #block_2
         widget = InputText( group_box, input_name="block_2" )
-        group_box.layout.addRow(QLabel("block_2:"), widget)
+        widget.label = QLabel("block_2:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #block_height
         widget = InputText( group_box, input_name="block_height" )
-        group_box.layout.addRow(QLabel("block_height:"), widget)
+        widget.label = QLabel("block_height:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
+
+        button = InputButton(self, 'Next')
+        button.setToolTip('Proceed to the next input set.')
+        button.clicked.connect(group_box.on_click)
+        self.widgets.append(button)
+
+        group_box.next_group_box = 'kpoint'
 
 
 
@@ -864,18 +991,28 @@ class InputBox(QGroupBox):
         
         #nosym
         widget = InputText( group_box, input_name="nosym" )
-        group_box.layout.addRow(QLabel("nosym:"), widget)
+        widget.label = QLabel("nosym:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #nosym_evc
         widget = InputText( group_box, input_name="nosym_evc" )
-        group_box.layout.addRow(QLabel("nosym_evc:"), widget)
+        widget.label = QLabel("nosym_evc:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #noinv
         widget = InputText( group_box, input_name="noinv" )
-        group_box.layout.addRow(QLabel("noinv:"), widget)
+        widget.label = QLabel("noinv:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
+
+        button = InputButton(self, 'Next')
+        button.setToolTip('Proceed to the next input set.')
+        button.clicked.connect(group_box.on_click)
+        self.widgets.append(button)
+
+        group_box.next_group_box = 'electrons'
         
 
 
@@ -887,90 +1024,106 @@ class InputBox(QGroupBox):
 
         #electron_maxstep
         widget = InputText( group_box, input_name="electron_maxstep" )
-        group_box.layout.addRow(QLabel("electron_maxstep:"), widget)
+        widget.label = QLabel("electron_maxstep:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #scf_must_converge
         widget = InputCheck( group_box, input_name="scf_must_converge")
-        group_box.layout.addRow(QLabel("scf_must_converge:"), widget)
+        widget.label = QLabel("scf_must_converge:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #conv_thr
         widget = InputCheck( group_box, input_name="conv_thr")
-        group_box.layout.addRow(QLabel("conv_thr:"), widget)
+        widget.label = QLabel("conv_thr:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #adaptive_thr
         widget = InputCheck( group_box, input_name="adaptive_thr")
-        group_box.layout.addRow(QLabel("adaptive_thr:"), widget)
+        widget.label = QLabel("adaptive_thr:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #conv_thr_init
         widget = InputCheck( group_box, input_name="conv_thr_init")
-        group_box.layout.addRow(QLabel("conv_thr_init:"), widget)
+        widget.label = QLabel("conv_thr_init:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #conv_thr_multi
         widget = InputCheck( group_box, input_name="conv_thr_multi")
-        group_box.layout.addRow(QLabel("conv_thr_multi:"), widget)
+        widget.label = QLabel("conv_thr_multi:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #mixing_mode
         widget = InputCombo( group_box, "mixing_mode" )
         widget.addItem("Plain", userData = "plain")
         widget.addItem("TF", userData = "TF")
         widget.addItem("Local-TF", userData = "local_TF")
-        group_box.layout.addRow(QLabel("mixing_mode:"), widget)
+        widget.label = QLabel("mixing_mode:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #mixing_beta
         widget = InputText( group_box, input_name="mixing_beta" )
-        group_box.layout.addRow(QLabel("mixing_beta:"), widget)
+        widget.label = QLabel("mixing_beta:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #mixing_ndim
         widget = InputText( group_box, input_name="mixing_ndim" )
-        group_box.layout.addRow(QLabel("mixing_ndim:"), widget)
+        widget.label = QLabel("mixing_ndim:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #mixing_fixed_ns
         widget = InputText( group_box, input_name="mixing_fixed_ns" )
-        group_box.layout.addRow(QLabel("mixing_fixed_ns"), widget)
+        widget.label = QLabel("mixing_fixed_ns:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #diagonalization
         widget = InputCombo( group_box, "diagonalization" )
         widget.addItem("david", userData = "david")
         widget.addItem("cg", userData = "cg")
-        group_box.layout.addRow(QLabel("diagonalization:"), widget)
+        widget.label = QLabel("diagonalization:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #diago_thr_init
         widget = InputText( group_box, input_name="diago_thr_init" )
-        group_box.layout.addRow(QLabel("diago_thr_init"), widget)
+        widget.label = QLabel("diago_thr_init:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #diago_cg_maxiter
         widget = InputText( group_box, input_name="diago_cg_maxiter" )
-        group_box.layout.addRow(QLabel("diago_cg_maxiter"), widget)
+        widget.label = QLabel("diago_cg_maxiter:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #diago_david_ndim
         widget = InputText( group_box, input_name="diago_david_ndim" )
-        group_box.layout.addRow(QLabel("diago_david_ndim"), widget)
+        widget.label = QLabel("diago_david_ndim:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #diago_full_acc
         widget = InputCheck( group_box, input_name="diago_full_acc")
-        group_box.layout.addRow(QLabel("diago_full_acc:"), widget)
+        widget.label = QLabel("diago_full_acc:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #startingpot
         widget = InputCombo( group_box, "startingpot" )
         widget.addItem("atomic", userData = "atomic")
         widget.addItem("file", userData = "file")
-        group_box.layout.addRow(QLabel("startingpot:"), widget)
+        widget.label = QLabel("startingpot:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #startingwfc
         widget = InputCombo( group_box, "startingwfc" )
@@ -978,13 +1131,22 @@ class InputBox(QGroupBox):
         widget.addItem("atomic+random", userData = "atomic+random")
         widget.addItem("random", userData = "random")
         widget.addItem("file", userData = "file")
-        group_box.layout.addRow(QLabel("startingwfc:"), widget)
+        widget.label = QLabel("startingwfc:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #tqr
         widget = InputCheck( group_box, input_name="tqr")
-        group_box.layout.addRow(QLabel("tqr:"), widget)
+        widget.label = QLabel("tqr:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
+
+        button = InputButton(self, 'Next')
+        button.setToolTip('Proceed to the next input set.')
+        button.clicked.connect(group_box.on_click)
+        self.widgets.append(button)
+
+        group_box.next_group_box = 'ions'
 
 
 
@@ -1004,15 +1166,17 @@ class InputBox(QGroupBox):
         widget.addItem("bfgs", userData = "bfgs")
         widget.addItem("damp", userData = "damp")
         widget.addItem("beeman", userData = "beeman")
-        group_box.layout.addRow(QLabel("ion_dynamics:"), widget)
+        widget.label = QLabel("ion_dynamics:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #ion_positions
         widget = InputCombo( group_box, "ion_positions" )
         widget.addItem("default", userData = "default")
         widget.addItem("from_input", userData = "from_input")
-        group_box.layout.addRow(QLabel("ion_positions:"), widget)
+        widget.label = QLabel("ion_positions:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #pot_extrapolation
         widget = InputCombo( group_box, "pot_extrapolation" )
@@ -1020,21 +1184,24 @@ class InputBox(QGroupBox):
         widget.addItem("Atomic", userData = "atomic")
         widget.addItem("First-Order", userData = "first_order")
         widget.addItem("Second-Order", userData = "second_order")
-        group_box.layout.addRow(QLabel("pot_extrapolation:"), widget)
+        widget.label = QLabel("pot_extrapolation:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #wfc_extrapolation
         widget = InputCombo( group_box, "wfc_extrapolation" )
         widget.addItem("None", userData = "none")
         widget.addItem("First-Order", userData = "first_order")
         widget.addItem("Second-Order", userData = "second_order")
-        group_box.layout.addRow(QLabel("wfc_extrapolation:"), widget)
+        widget.label = QLabel("wfc_extrapolation:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #remove_rigid_rot
         widget = InputCheck( group_box, input_name="remove_rigid_rot")
-        group_box.layout.addRow(QLabel("remove_rigid_rot:"), widget)
+        widget.label = QLabel("remove_rigid_rot:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #ion_temperature
         widget = InputCombo( group_box, "ion_temperature" )
@@ -1046,63 +1213,82 @@ class InputBox(QGroupBox):
         widget.addItem("andersen", userData = "andersen")
         widget.addItem("initial", userData = "initial")
         widget.addItem("not_controlled", userData = "not_controlled")
-        group_box.layout.addRow(QLabel("Thermostat:"), widget)
+        widget.label = QLabel("Thermostat:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #tempw
         widget = InputText( group_box, input_name="tempw" )
-        group_box.layout.addRow(QLabel("tempw:"), widget)
+        widget.label = QLabel("tempw:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #tolp
         widget = InputText( group_box, input_name="tolp" )
-        group_box.layout.addRow(QLabel("tolp:"), widget)
+        widget.label = QLabel("tolp:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #delta_t
         widget = InputText( group_box, input_name="delta_t" )
-        group_box.layout.addRow(QLabel("delta_t:"), widget)
+        widget.label = QLabel("delta_t:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #nraise
         widget = InputText( group_box, input_name="nraise" )
-        group_box.layout.addRow(QLabel("nraise:"), widget)
+        widget.label = QLabel("nraise:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #refold_pos
         widget = InputCheck( group_box, input_name="refold_pos")
-        group_box.layout.addRow(QLabel("refold_pos:"), widget)
+        widget.label = QLabel("refold_pos:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #upscale
         widget = InputText( group_box, input_name="upscale" )
-        group_box.layout.addRow(QLabel("upscale:"), widget)
+        widget.label = QLabel("upscale:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #bfgs_ndim
         widget = InputText( group_box, input_name="bfgs_ndim" )
-        group_box.layout.addRow(QLabel("bfgs_ndim:"), widget)
+        widget.label = QLabel("bfgs_ndim:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #trust_radius_min
         widget = InputText( group_box, input_name="trust_radius_min" )
-        group_box.layout.addRow(QLabel("trust_radius_min:"), widget)
+        widget.label = QLabel("trust_radius_min:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #trust_radius_ini
         widget = InputText( group_box, input_name="trust_radius_ini" )
-        group_box.layout.addRow(QLabel("trust_radius_ini:"), widget)
+        widget.label = QLabel("trust_radius_ini:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #w_1
         widget = InputText( group_box, input_name="w_1" )
-        group_box.layout.addRow(QLabel("w_1:"), widget)
+        widget.label = QLabel("w_1:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #w_2
         widget = InputText( group_box, input_name="w_2" )
-        group_box.layout.addRow(QLabel("w_2:"), widget)
+        widget.label = QLabel("w_2:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
+
+        button = InputButton(self, 'Next')
+        button.setToolTip('Proceed to the next input set.')
+        button.clicked.connect(group_box.on_click)
+        self.widgets.append(button)
+
+        group_box.next_group_box = 'cell dynamics'
 
 
     #--------------------------------------------------------#
@@ -1121,28 +1307,33 @@ class InputBox(QGroupBox):
         widget.addItem("none", userData = "none")
         widget.addItem("pr", userData = "pr")
         widget.addItem("w", userData = "w")
-        group_box.layout.addRow(QLabel("cell_dynamics:"), widget)
+        widget.label = QLabel("cell_dynamics:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
 
         #press
         widget = InputText( group_box, input_name="press" )
-        group_box.layout.addRow(QLabel("press:"), widget)
+        widget.label = QLabel("press:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #wmass
         widget = InputText( group_box, input_name="wmass" )
-        group_box.layout.addRow(QLabel("wmass:"), widget)
+        widget.label = QLabel("wmass:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #cell_factor
         widget = InputText( group_box, input_name="cell_factor" )
-        group_box.layout.addRow(QLabel("cell_factor:"), widget)
+        widget.label = QLabel("cell_factor:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #press_conv_thr
         widget = InputText( group_box, input_name="press_conv_thr" )
-        group_box.layout.addRow(QLabel("press_conv_thr:"), widget)
+        widget.label = QLabel("press_conv_thr:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #cell_dofree
         widget = InputCombo( group_box, "cell_dofree" )
@@ -1158,8 +1349,16 @@ class InputBox(QGroupBox):
         widget.addItem("volume", userData = "volume")
         widget.addItem("2Dxy", userData = "2Dxy")
         widget.addItem("2Dshape", userData = "2Dshape")
-        group_box.layout.addRow(QLabel("cell_dofree:"), widget)
+        widget.label = QLabel("cell_dofree:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
+
+        button = InputButton(self, 'Next')
+        button.setToolTip('Proceed to the next input set.')
+        button.clicked.connect(group_box.on_click)
+        self.widgets.append(button)
+
+        group_box.next_group_box = 'print'
 
 
 
@@ -1169,51 +1368,83 @@ class InputBox(QGroupBox):
     def create_print_box(self):
         group_box = self
 
+        #verbosity
+        widget = InputCheck( group_box, input_name="verbosity")
+        widget.label = QLabel("Verbosity:")
+        widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
+
+        #restart_mode
+        widget = InputCheck( group_box, input_name="restart_mode")
+        widget.label = QLabel("Restart:")
+        widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
+
+        #wf_collect - just set to .true.
+        widget = InputCheck( group_box, input_name="wf_collect")
+        widget.label = QLabel("Collect Wavefunctions:")
+        widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
+
+        #max_seconds
+        widget = InputText( group_box, input_name="max_seconds" )
+        widget.label = QLabel("Checkpoint Time (hrs):")
+        widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
+
         #iprint
         widget = InputText( group_box, input_name="iprint" )
-        group_box.layout.addRow(QLabel("iprint:"), widget)
+        widget.label = QLabel("iprint:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #outdir
         widget = InputText( group_box, input_name="outdir" )
-        group_box.layout.addRow(QLabel("Output Directory:"), widget)
+        widget.label = QLabel("Output Directory:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #wfcdir
         widget = InputText( group_box, input_name="wfcdir" )
-        group_box.layout.addRow(QLabel("Scratch Directory:"), widget)
+        widget.label = QLabel("Scratch Directory:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #pseudo_dir
         widget = InputText( group_box, input_name="pseudo_dir" )
-        group_box.layout.addRow(QLabel("Pseudopotential Directory:"), widget)
+        widget.label = QLabel("Pseudopotential Directory:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #prefix
         widget = InputText( group_box, input_name="Prefix" )
-        group_box.layout.addRow(QLabel("Prefix:"), widget)
+        widget.label = QLabel("Prefix:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
         #tstress
         widget = InputCheck( group_box, input_name="tstress")
-        group_box.layout.addRow(QLabel("tstress:"), widget)
+        widget.label = QLabel("tstress:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #tprnfor
         widget = InputCheck( group_box, input_name="tprnfor")
-        group_box.layout.addRow(QLabel("Forces:"), widget)
+        widget.label = QLabel("Forces:")
         widget.stateChanged.connect( widget.on_state_changed )
+        self.widgets.append(widget)
 
         #lkpoint_dir
         widget = InputText( group_box, input_name="lkpoint_dir" )
-        group_box.layout.addRow(QLabel("lkpoint_dir:"), widget)
+        widget.label = QLabel("lkpoint_dir:")
         widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
 
 
         button = InputButton(self, 'Next')
         button.setToolTip('Proceed to the next input set.')
         button.clicked.connect(group_box.on_click)
-        group_box.layout.addRow(button)
+        self.widgets.append(button)
 
         group_box.next_group_box = '???'
 
