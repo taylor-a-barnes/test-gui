@@ -54,13 +54,15 @@ class Dialog(QDialog):
         group_box.initialize_widgets()
 
         group_box.setLayout(group_box.layout)
-
+        
         self.group_boxes.append(group_box)
 
         return group_box
 
-    def on_update(self):
-        
+    def on_window_update(self):
+
+        print("Window Updating")
+
         for group_box in self.group_boxes:
             group_box.update_layout()
 
@@ -103,9 +105,17 @@ class InputBox(QGroupBox):
         
         self.layout = QFormLayout()
 
+
+
+        #self.layout.setSpacing(0)
+
+
         self.widgets = []
 
         self.input_file = input_file
+
+        #conditions under which this group box should be shown
+        self.show_conditions = []
 
 
     def initialize_widgets(self):
@@ -125,6 +135,8 @@ class InputBox(QGroupBox):
         #start with a fresh layout
 #        self.clear_layout()
 
+        print("start of initialize_widgets")
+        print(self.window())
         
         if self.group_name == 'basic':
             self.create_basic_box()
@@ -162,13 +174,23 @@ class InputBox(QGroupBox):
         self.apply_layout()
         self.update_layout()
 
+        print("end of initialize_widgets")
+        print(self.window())
+
     def apply_layout(self):
         for w in self.widgets:
 
-            try: #check if the widget has a label
-                self.layout.addRow( w.label, w)
+            try:
+                self.layout.addRow( w.label, w.widget )
+                print("HERE")
+
             except AttributeError:
-                self.layout.addRow( w )
+#                pass
+                try: #check if the widget has a label
+                    self.layout.addRow( w.label, w)
+                except AttributeError:
+                    self.layout.addRow( w )
+
             w.shown = True
 
     def clear_layout(self):
@@ -252,6 +274,45 @@ class InputBox(QGroupBox):
         widget.addItem("Bands", userData = "bands") #how is this different from NSCF?
         widget.addItem("Geometry Relaxation", userData = "relax") #note: includes vc-relax
         widget.addItem("Molecular Dynamics", userData = "md") #note: includes vc-md
+        widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
+
+        widget = InputField( group_box, "combo", label_name = "Calculation:", input_name = "calculation")
+
+        #tot_charge
+        widget = InputText( group_box, input_name="tot_charge" )
+        widget.label = QLabel("Charge:")
+        widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
+
+        #ecutwfc
+        widget = InputText( group_box, input_name="ecutwfc" )
+        widget.label = QLabel("ecutwfc:")
+        widget.textChanged.connect( widget.on_text_changed )
+        #widget.setContentsMargins(0,280,0,0)
+        #widget.setMinimumHeight(100)
+        #widget.setContentsMargins(0,100,0,100)
+        #widget.label.setContentsMargins(0,100,0,100)
+        #widget.label.setMinimumHeight(200)
+        self.widgets.append(widget)
+
+        #GUI_exx_corr (custom)
+        widget = InputCombo( group_box, "GUI_exx_corr" )
+        widget.addItem("None", userData = "none") #NOTE: This is not a default setting
+        widget.addItem("DFT+U", userData = "dft+u")
+        widget.addItem("DFT+U+J", userData = "dft+u+j")
+        widget.addItem("Hybrid Functional", userData = "hybrid")
+        widget.label = QLabel("Exchange Correction:")
+        widget.currentIndexChanged.connect( widget.on_index_changed )
+        self.widgets.append(widget)
+
+        #vdw_corr
+        widget = InputCombo( group_box, "vdw_corr" )
+        widget.addItem("None", userData = "none") #NOTE: This is not a default setting
+        widget.addItem("Grimme-D2", userData = "grimme-d2")
+        widget.addItem("Tkatchenko-Scheffler", userData = "tkatchenko-scheffler")
+        widget.addItem("XDM", userData = "xdm")
+        widget.label = QLabel("Van der Waals Correction:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
         self.widgets.append(widget)
 
@@ -377,6 +438,7 @@ class InputBox(QGroupBox):
         widget.addItem("HSE", userData = "hse")
         widget.label = QLabel("DFT Functional:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
+        widget.show_conditions.append( ["GUI_exx_corr","==","hybrid"] )
         self.widgets.append(widget)
 
         #etot_conv_thr
@@ -394,9 +456,17 @@ class InputBox(QGroupBox):
 
         #nstep
         widget = InputText( group_box, input_name="nstep" )
-        widget.label = QLabel("nstep:")
+        widget.label = QLabel("Maximum Relaxation Steps:")
         widget.textChanged.connect( widget.on_text_changed )
-        widget.show_conditions.append( [ ["calculation","==","relax"], "or", ["calculation","==","md"] ] )
+        widget.show_conditions.append( ["calculation","==","relax"] )
+        self.widgets.append(widget)
+
+        #nstep
+        widget = InputText( group_box, input_name="nstep" )
+        widget.label = QLabel("Number of Timesteps:")
+        widget.textChanged.connect( widget.on_text_changed )
+        #widget.show_conditions.append( [ ["calculation","==","relax"], "or", ["calculation","==","md"] ] )
+        widget.show_conditions.append( ["calculation","==","md"] )
         self.widgets.append(widget)
 
         #nbnd
@@ -405,21 +475,9 @@ class InputBox(QGroupBox):
         widget.textChanged.connect( widget.on_text_changed )
         self.widgets.append(widget)
 
-        #tot_charge
-        widget = InputText( group_box, input_name="tot_charge" )
-        widget.label = QLabel("Charge:")
-        widget.textChanged.connect( widget.on_text_changed )
-        self.widgets.append(widget)
-
         #tot_magnetization
         widget = InputText( group_box, input_name="tot_magnetization" )
         widget.label = QLabel("tot_magnetization:")
-        widget.textChanged.connect( widget.on_text_changed )
-        self.widgets.append(widget)
-
-        #ecutwfc
-        widget = InputText( group_box, input_name="ecutwfc" )
-        widget.label = QLabel("ecutwfc:")
         widget.textChanged.connect( widget.on_text_changed )
         self.widgets.append(widget)
 
@@ -431,12 +489,6 @@ class InputBox(QGroupBox):
 
         #nr1, nr2, and nr3
         #nr1s, nr2s, and nr3s
-
-        #ecutfock
-        widget = InputText( group_box, input_name="ecutfock" )
-        widget.label = QLabel("ecutfock:")
-        widget.textChanged.connect( widget.on_text_changed )
-        self.widgets.append(widget)
 
         #occupations
         widget = InputCombo( group_box, "occupations" )
@@ -487,49 +539,52 @@ class InputBox(QGroupBox):
         widget.textChanged.connect( widget.on_text_changed )
         self.widgets.append(widget)
 
+        #ecutfock
+        widget = InputText( group_box, input_name="ecutfock" )
+        widget.label = QLabel("ecutfock:")
+        widget.textChanged.connect( widget.on_text_changed )
+        widget.show_conditions.append( ["GUI_exx_corr","==","hybrid"] )
+        self.widgets.append(widget)
+
         #screening_parameter
         widget = InputText( group_box, input_name="screening_parameter" )
         widget.label = QLabel("screening_parameter:")
         widget.textChanged.connect( widget.on_text_changed )
+        widget.show_conditions.append( ["GUI_exx_corr","==","hybrid"] )
         self.widgets.append(widget)
 
         #exxdiv_treatment
         widget = InputText( group_box, input_name="exxdiv_treatment" )
         widget.label = QLabel("exxdiv_treatment:")
         widget.textChanged.connect( widget.on_text_changed )
+        widget.show_conditions.append( ["GUI_exx_corr","==","hybrid"] )
         self.widgets.append(widget)
 
         #x_gamma_extrapolation
         widget = InputText( group_box, input_name="x_gamma_extrapolation" )
         widget.label = QLabel("x_gamma_extrapolation:")
         widget.textChanged.connect( widget.on_text_changed )
+        widget.show_conditions.append( ["GUI_exx_corr","==","hybrid"] )
         self.widgets.append(widget)
 
         #ecutvcut
         widget = InputText( group_box, input_name="ecutvcut" )
         widget.label = QLabel("ecutvcut:")
         widget.textChanged.connect( widget.on_text_changed )
+        widget.show_conditions.append( ["GUI_exx_corr","==","hybrid"] )
         self.widgets.append(widget)
 
         #nqx1, nqx2, nqx3
         widget = InputText( group_box, input_name="nqx1" )
         widget.label = QLabel("nqx1, nqx2, nqx3:")
         widget.textChanged.connect( widget.on_text_changed )
+        widget.show_conditions.append( ["GUI_exx_corr","==","hybrid"] )
         self.widgets.append(widget)
 
 
 
 
         
-        #--------------------------------------------------------#
-        # Per-species information
-        #--------------------------------------------------------#
-
-        #starting_magnetization
-        widget = InputText( group_box, input_name="starting_magnetization" )
-        widget.label = QLabel("starting_magnetization:")
-        widget.textChanged.connect( widget.on_text_changed )
-        self.widgets.append(widget)
 
 
 
@@ -570,7 +625,7 @@ class InputBox(QGroupBox):
         widget.addItem("Norm-Atomic", userData = "norm-atomic")
         widget.addItem("File", userData = "file")
         widget.addItem("Pseudo", userData = "pseudo")
-        widget.label = QLabel("DFT Functional:")
+        widget.label = QLabel("U Projection Type:")
         widget.currentIndexChanged.connect( widget.on_index_changed )
         self.widgets.append(widget)
 
@@ -630,16 +685,6 @@ class InputBox(QGroupBox):
     #--------------------------------------------------------#
     def create_vdw_box(self):
         group_box = self
-
-        #vdw_corr
-        widget = InputCombo( group_box, "vdw_corr" )
-        widget.addItem("None", userData = "none") #NOTE: This is not a default setting
-        widget.addItem("Grimme-D2", userData = "grimme-d2")
-        widget.addItem("Tkatchenko-Scheffler", userData = "tkatchenko-scheffler")
-        widget.addItem("XDM", userData = "xdm")
-        widget.label = QLabel("Van der Waals Correction:")
-        widget.currentIndexChanged.connect( widget.on_index_changed )
-        self.widgets.append(widget)
 
         #london_rcut
         widget = InputText( group_box, input_name="london_rcut" )
@@ -764,6 +809,16 @@ class InputBox(QGroupBox):
         #report
         widget = InputText( group_box, input_name="report" )
         widget.label = QLabel("report:")
+        widget.textChanged.connect( widget.on_text_changed )
+        self.widgets.append(widget)
+
+        #--------------------------------------------------------#
+        # Per-species information
+        #--------------------------------------------------------#
+
+        #starting_magnetization
+        widget = InputText( group_box, input_name="starting_magnetization" )
+        widget.label = QLabel("starting_magnetization:")
         widget.textChanged.connect( widget.on_text_changed )
         self.widgets.append(widget)
 
@@ -1472,8 +1527,10 @@ class InputBox(QGroupBox):
     def on_update(self):
 
         print("Box updating")
+        print(self)
+        print(self.window())
 
-        self.window().on_update()
+        self.window().on_window_update()
 
         #self.update_layout()
 
@@ -1490,6 +1547,92 @@ class InputBox(QGroupBox):
 
 
 
+class InputField():
+    """
+    This class represents a text box in the GUI
+    """
+
+    def __init__(self, parent_, type, label_name = None, input_name = None):
+
+        self.input_name = input_name
+
+        if label_name:
+            self.label = QLabel(label_name)
+        else:
+            self.label = None
+
+        #is this widget currently being shown to the user?
+        self.shown = False
+
+        #conditions under which this text box should be shown
+        self.show_conditions = []
+
+        self.group_box = parent_
+
+        if type == "combo":
+
+            self.widget = QComboBox(parent = parent_)
+
+            self.widget.addItem("SCF (Self-Consistent Field)", userData = "scf")
+            self.widget.addItem("NSCF (Non-Self-Consistent Field)", userData = "nscf") #replace with maximum_iterations?
+            self.widget.addItem("Bands", userData = "bands") #how is this different from NSCF?
+            self.widget.addItem("Geometry Relaxation", userData = "relax") #note: includes vc-relax
+            self.widget.addItem("Molecular Dynamics", userData = "md") #note: includes vc-md
+
+            self.widget.currentIndexChanged.connect( self.on_index_changed )
+            
+        
+        elif type == "text":
+
+            #initialize the input text
+            try:
+                text = self.group_box.input_file.inputs[self.input_name]
+                self.setText(text)
+            except KeyError:
+                pass
+
+        self.group_box.widgets.append(self)
+        
+
+    def set_visible(self, visible):
+        #find my row
+        #layout = self.parent().layout
+        #pos = layout.getWidgetPosition(self)
+        #print(pos)
+        #print(pos[0])
+
+        self.widget.setVisible(visible)
+        self.shown = visible
+        
+        if self.label:
+            self.label.setVisible(visible)
+            self.label.shown = visible
+
+#    @pyqtSlot(str)
+    def on_text_changed(self, string):
+        
+        self.parent().input_file.inputs[self.input_name] = string
+        self.parent().on_update()
+
+#    @pyqtSlot(int)
+    def on_index_changed(self, index):
+        
+        #self.parent().input_file.inputs[self.input_name] = self.itemData(index)
+        #self.parent().on_update()
+
+        self.group_box.input_file.inputs[self.input_name] = self.widget.itemData(index)
+        self.group_box.on_update()
+
+#    @pyqtSlot(int)
+    def on_state_changed(self, value):
+        
+        self.parent().input_file.inputs[self.input_name] = value
+        self.parent().on_update()
+
+
+
+
+
 class InputText(QLineEdit):
     """
     This class represents a text box in the GUI
@@ -1501,7 +1644,7 @@ class InputText(QLineEdit):
         self.input_name = input_name
 
         #does this widget have a label widget?
-        self.widget = None
+        self.label = None
 
         #is this widget currently being shown to the user?
         self.shown = False
@@ -1517,6 +1660,12 @@ class InputText(QLineEdit):
             pass
 
     def set_visible(self, visible):
+        #find my row
+        #layout = self.parent().layout
+        #pos = layout.getWidgetPosition(self)
+        #print(pos)
+        #print(pos[0])
+
         self.setVisible(visible)
         self.shown = visible
         
@@ -1549,7 +1698,7 @@ class InputCombo(QComboBox):
         self.input_name = input_name
 
         #does this widget have a label widget?
-        self.widget = None
+        self.label = None
 
         #is this widget currently being shown to the user?
         self.shown = False
@@ -1586,7 +1735,7 @@ class InputCheck(QCheckBox):
         self.input_name = input_name
 
         #does this widget have a label widget?
-        self.widget = None
+        self.label = None
 
         #is this widget currently being shown to the user?
         self.shown = False
@@ -1623,7 +1772,7 @@ class InputButton(QPushButton):
         self.input_name = input_name
 
         #does this widget have a label widget?
-        self.widget = None
+        self.label = None
 
         #is this widget currently being shown to the user?
         self.shown = False
