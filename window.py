@@ -69,7 +69,7 @@ class Dialog(QDialog):
 
     def on_window_update(self):
 
-        print("Window Updating")
+        #print("Window Updating")
 
         for group_box in self.group_boxes:
             group_box.update_layout()
@@ -144,8 +144,8 @@ class InputBox(QGroupBox):
         #start with a fresh layout
 #        self.clear_layout()
 
-        print("start of initialize_widgets")
-        print(self.window())
+        #print("start of initialize_widgets")
+        #print(self.window())
         
         if self.group_name == 'basic':
             self.create_basic_box()
@@ -194,8 +194,8 @@ class InputBox(QGroupBox):
         self.apply_layout()
         self.update_layout()
 
-        print("end of initialize_widgets")
-        print(self.window())
+        #print("end of initialize_widgets")
+        #print(self.window())
 
     def update_visibility(self):
 
@@ -391,6 +391,14 @@ class InputBox(QGroupBox):
 
         #v3
         widget = InputField( group_box, "text", label_name = "v3:", input_name = "v3")
+
+        #GUI_variable_cell
+        widget = InputField( group_box, "check", label_name = "Cell Relaxation:", input_name = "GUI_variable_cell")
+        widget.show_conditions.append( ["calculation","==","relax"] )
+
+        #GUI_variable_cell
+        widget = InputField( group_box, "check", label_name = "Cell Dynamics:", input_name = "GUI_variable_cell")
+        widget.show_conditions.append( ["calculation","==","md"] )
 
         #assume_isolated
         widget = InputField( group_box, "combo", label_name = "Cell Periodicity:", input_name = "assume_isolated")
@@ -631,6 +639,19 @@ class InputBox(QGroupBox):
 
         #dt
         widget = InputField( group_box, "text", label_name = "Timestep:", input_name = "dt")
+
+        #ion_dynamics
+        widget = InputField( group_box, "combo", label_name = "ion_dynamics:", input_name = "ion_dynamics")
+        widget.add_combo_choice( "verlet", "verlet" )
+        widget.add_combo_choice( "langevin", "langevin" )
+        widget.add_combo_choice( "langevin-smc", "langevin-smc" )
+        widget.show_conditions.append( ["GUI_variable_cell","==",0] )
+
+        #ion_dynamics
+        widget = InputField( group_box, "combo", label_name = "ion_dynamics:", input_name = "ion_dynamics")
+        widget.add_combo_choice( "beeman", "beeman" )
+        widget.show_conditions.append( ["GUI_variable_cell","==",2] )
+
 
         widget = InputField( group_box, "button", input_name = "Next")
 
@@ -903,7 +924,7 @@ class InputBox(QGroupBox):
 
 
     #--------------------------------------------------------#
-    # Ions Inputs
+    # Ions Inputs NOTE: ONLY FOR RELAXATION CALCULATIONS
     #--------------------------------------------------------#
     def create_ions_box(self):
         group_box = self
@@ -912,33 +933,28 @@ class InputBox(QGroupBox):
         widget = InputField( group_box, "combo", label_name = "ion_dynamics:", input_name = "ion_dynamics")
         widget.add_combo_choice( "bfgs", "bfgs" )
         widget.add_combo_choice( "damp", "damp" )
-        widget.add_combo_choice( "verlet", "verlet" )
-        widget.add_combo_choice( "langevin", "langevin" )
-        widget.add_combo_choice( "langevin-dmc", "langevin-dmc" )
-        widget.add_combo_choice( "bfgs", "bfgs" )
-        widget.add_combo_choice( "damp", "damp" )
-        widget.add_combo_choice( "beeman", "beeman" )
 
         #ion_positions
-        widget = InputField( group_box, "combo", label_name = "ion_positions:", input_name = "ion_positions")
-        widget.add_combo_choice( "default", "default" )
-        widget.add_combo_choice( "from_input", "from_input" )
+#        widget = InputField( group_box, "combo", label_name = "ion_positions:", input_name = "ion_positions")
+#        widget.add_combo_choice( "default", "default" )
+#        widget.add_combo_choice( "from_input", "from_input" )
 
         #pot_extrapolation
-        widget = InputField( group_box, "combo", label_name = "pot_extrapolation:", input_name = "pot_extrapolation")
+        widget = InputField( group_box, "combo", label_name = "Potential Extrapolation:", input_name = "pot_extrapolation")
         widget.add_combo_choice( "None", "none" )
         widget.add_combo_choice( "Atomic", "atomic" )
         widget.add_combo_choice( "First-Order", "first_order" )
         widget.add_combo_choice( "Second-Order", "first_order" )
 
         #wfc_extrapolation
-        widget = InputField( group_box, "combo", label_name = "wfc_extrapolation:", input_name = "wfc_extrapolation")
+        widget = InputField( group_box, "combo", label_name = "Wavefunction Extrapolation:", input_name = "wfc_extrapolation")
         widget.add_combo_choice( "None", "none" )
         widget.add_combo_choice( "First-Order", "first_order" )
         widget.add_combo_choice( "Second-Order", "first_order" )
 
         #remove_rigid_rot
         widget = InputField( group_box, "check", label_name = "remove_rigid_rot:", input_name = "remove_rigid_rot")
+        widget.show_conditions.append( ["assume_isolated","!=","none"] )
 
         #ion_temperature
         widget = InputField( group_box, "combo", label_name = "ion_temperature:", input_name = "ion_temperature")
@@ -1096,9 +1112,9 @@ class InputBox(QGroupBox):
 
     def on_update(self):
 
-        print("Box updating")
-        print(self)
-        print(self.window())
+        #print("Box updating")
+        #print(self)
+        #print(self.window())
 
         self.window().on_window_update()
 
@@ -1107,7 +1123,7 @@ class InputBox(QGroupBox):
     @pyqtSlot()
     def on_click(self):
 
-        print('PyQt5 button click')
+        #print('PyQt5 button click')
 
         #create the next group box
         self.window().create_box(self.next_group_box)
@@ -1142,6 +1158,8 @@ class InputField():
 
         self.initialize_widget()
 
+        self.initialize_value()
+
     def initialize_widget(self):
 
         if self.label_name:
@@ -1168,6 +1186,24 @@ class InputField():
             
             self.widget = InputButton(self.group_box, self.input_name)
             self.widget.clicked.connect(self.group_box.on_click)
+
+    def initialize_value(self):
+
+        if self.type == "text":
+
+            self.group_box.input_file.inputs[self.input_name] = ""
+
+        elif self.type == "combo":
+
+            pass #must wait until an item is added before initializing this value
+            
+        elif self.type == "check":
+
+            self.group_box.input_file.inputs[self.input_name] = 0
+            
+        elif self.type == "button":
+
+            pass
         
     def add_combo_choice(self, label, name):
         
@@ -1177,6 +1213,13 @@ class InputField():
 
         #self.combo_choices.append( (label,name) )
         self.combo_choices.append( (label,name) )
+
+
+        #if this is the first choice, initialize the value associated with this widget
+        if len(self.combo_choices) == 1:
+
+            self.group_box.input_file.inputs[self.input_name] = self.widget.itemData(0)
+
 
 
     def set_visible(self, visible):
