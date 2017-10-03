@@ -278,40 +278,23 @@ class InputBox(QGroupBox):
         widget = InputField( group_box, "text", label_name = "Charge:", input_name = "tot_charge")
 
         #ecutwfc
-        widget = InputText( group_box, input_name="ecutwfc" )
-        widget.label = QLabel("ecutwfc:")
-        widget.textChanged.connect( widget.on_text_changed )
-        #widget.setContentsMargins(0,280,0,0)
-        #widget.setMinimumHeight(100)
-        #widget.setContentsMargins(0,100,0,100)
-        #widget.label.setContentsMargins(0,100,0,100)
-        #widget.label.setMinimumHeight(200)
-        self.widgets.append(widget)
+        widget = InputField( group_box, "text", label_name = "ecutwfc:", input_name = "ecutwfc")
 
         #GUI_exx_corr (custom)
-        widget = InputCombo( group_box, "GUI_exx_corr" )
-        widget.addItem("None", userData = "none") #NOTE: This is not a default setting
-        widget.addItem("DFT+U", userData = "dft+u")
-        widget.addItem("DFT+U+J", userData = "dft+u+j")
-        widget.addItem("Hybrid Functional", userData = "hybrid")
-        widget.label = QLabel("Exchange Correction:")
-        widget.currentIndexChanged.connect( widget.on_index_changed )
-        self.widgets.append(widget)
+        widget = InputField( group_box, "combo", label_name = "Exchange Correction:", input_name = "GUI_exx_corr")
+        widget.add_combo_choice( "None", "none" )
+        widget.add_combo_choice( "DFT+U", "dft+u" )
+        widget.add_combo_choice( "DFT+U+J", "dft+u+j" )
+        widget.add_combo_choice( "Hybrid Functional", "hybrid" )
 
         #vdw_corr
-        widget = InputCombo( group_box, "vdw_corr" )
-        widget.addItem("None", userData = "none") #NOTE: This is not a default setting
-        widget.addItem("Grimme-D2", userData = "grimme-d2")
-        widget.addItem("Tkatchenko-Scheffler", userData = "tkatchenko-scheffler")
-        widget.addItem("XDM", userData = "xdm")
-        widget.label = QLabel("Van der Waals Correction:")
-        widget.currentIndexChanged.connect( widget.on_index_changed )
-        self.widgets.append(widget)
+        widget = InputField( group_box, "combo", label_name = "Van der Waals Correction:", input_name = "vdw_corr")
+        widget.add_combo_choice( "None", "none" )
+        widget.add_combo_choice( "Grimme-D2", "grimme-d2" )
+        widget.add_combo_choice( "Tkatchenko-Scheffler", "tkatchenko-scheffler" )
+        widget.add_combo_choice( "XDM", "xdm" )
 
-        button = InputButton(self, 'Next')
-        button.setToolTip('Proceed to the next input set.')
-        button.clicked.connect(group_box.on_click)
-        self.widgets.append(button)
+        widget = InputField( group_box, "button", input_name = "Next")
 
         group_box.next_group_box = 'cell'
 
@@ -322,93 +305,63 @@ class InputBox(QGroupBox):
         group_box = self
 
         #ibrav
-        widget = InputCombo( group_box, "ibrav" )
-        widget.addItem("Custom", userData = "0")
-        widget.addItem("Simple Cubic", userData = "1")
-        widget.addItem("Face-Centered Cubic", userData = "2")
-        widget.addItem("Body-Centered Cubic", userData = "3")
-        widget.addItem("Hexagonal and Trigonal P", userData = "4")
-        widget.addItem("Trigonal R, 3-fold axis c", userData = "5")
-        widget.addItem("Trigonal R, 3-fold axis <111>", userData = "-5")
-        widget.addItem("Tetragonal P", userData = "6")
-        widget.addItem("Tetragonal I", userData = "7")
-        widget.addItem("Orthorhombic P", userData = "8")
-        widget.addItem("Base-Centered Orthorhombic", userData = "9")
-        widget.addItem("Face-Centered Orthorhombic", userData = "10")
-        widget.addItem("Body-Centered Orthorhombic", userData = "11")
-        widget.addItem("Monoclinic P, unique axis c", userData = "12")
-        widget.addItem("Monoclinic P, unique axis b", userData = "-12")
-        widget.addItem("Base-Centered Monoclinic", userData = "13")
-        widget.addItem("Triclinic", userData = "14")
-        widget.label = QLabel("Lattice Type:")
-        widget.currentIndexChanged.connect( widget.on_index_changed )
-        self.widgets.append(widget)
+        widget = InputField( group_box, "combo", label_name = "Lattice Type:", input_name = "ibrav")
+        widget.add_combo_choice( "Custom", "0" )
+        widget.add_combo_choice( "Simple Cubic", "1" )
+        widget.add_combo_choice( "Face-Centered Cubic", "2" )
+        widget.add_combo_choice( "Body-Centered Cubic", "3" )
+        widget.add_combo_choice( "Hexagonal and Trigonal P", "4" )
+        widget.add_combo_choice( "Trigonal R, 3-fold axis c", "5" )
+        widget.add_combo_choice( "Trigonal R, 3-fold axis <111>", "-5" )
+        widget.add_combo_choice( "Tetragonal P", "6" )
+        widget.add_combo_choice( "Tetragonal I", "7" )
+        widget.add_combo_choice( "Orthorhombic P", "8" )
+        widget.add_combo_choice( "Base-Centered Orthorhombic", "9" )
+        widget.add_combo_choice( "Face-Centered Orthorhombic", "10" )
+        widget.add_combo_choice( "Body-Centered Orthorhombic", "11" )
+        widget.add_combo_choice( "Monoclinic P, unique axis c", "12" )
+        widget.add_combo_choice( "Monoclinic P, unique axis b", "-12" )
+        widget.add_combo_choice( "Base-Centered Monoclinic", "13" )
+        widget.add_combo_choice( "Triclinic", "14" )
         
         #v1
-        widget = InputText( group_box, input_name="v1" )
-        widget.label = QLabel("v1:")
-        widget.textChanged.connect( widget.on_text_changed )
-        self.widgets.append(widget)
+        widget = InputField( group_box, "text", label_name = "v1:", input_name = "v1")
 
         #v2
-        widget = InputText( group_box, input_name="v2" )
-        widget.label = QLabel("v2:")
-        widget.textChanged.connect( widget.on_text_changed )
-        self.widgets.append(widget)
+        widget = InputField( group_box, "text", label_name = "v2:", input_name = "v2")
 
         #v3
-        widget = InputText( group_box, input_name="v3" )
-        widget.label = QLabel("v3:")
-        widget.textChanged.connect( widget.on_text_changed )
-        self.widgets.append(widget)
+        widget = InputField( group_box, "text", label_name = "v3:", input_name = "v3")
 
         #assume_isolated
-        widget = InputCombo( group_box, "assume_isolated" )
-        widget.addItem("Periodic", userData = "none")
-        widget.addItem("ESM (Effective Screening Medium)", userData = "esm")
-        widget.addItem("Vacuum (Makov-Payne Method)", userData = "makov-payne")
-        widget.addItem("Vacuum (Martyna-Tuckerman Method)", userData = "martyna-tuckerman")
-        widget.label = QLabel("Cell Periodicity:")
-        widget.currentIndexChanged.connect( widget.on_index_changed )
-        self.widgets.append(widget)
+        widget = InputField( group_box, "combo", label_name = "Cell Periodicity:", input_name = "assume_isolated")
+        widget.add_combo_choice( "Periodic", "none" )
+        widget.add_combo_choice( "ESM (Effective Screening Medium)", "esm" )
+        widget.add_combo_choice( "Vacuum (Makov-Payne Method)", "makov-payne" )
+        widget.add_combo_choice( "Vacuum (Martyna-Tuckerman Method)", "martyna-tuckerman" )
 
         #esm_bc
-        widget = InputCombo( group_box, "esm_bc" )
-        widget.addItem("Periodic", userData = "pbc")
-        widget.addItem("Vacuum-Slab-Vacuum", userData = "bc1")
-        widget.addItem("Metal-Slab-Metal", userData = "bc2")
-        widget.addItem("Vacuum-Slab-Metal", userData = "bc3")
-        widget.label = QLabel("ESM Boundary Conditions:")
-        widget.currentIndexChanged.connect( widget.on_index_changed )
+        widget = InputField( group_box, "combo", label_name = "ESM Boundary Conditions:", input_name = "esm_bc")
+        widget.add_combo_choice( "Periodic", "pbc" )
+        widget.add_combo_choice( "Vacuum-Slab-Vacuum", "bc1" )
+        widget.add_combo_choice( "Metal-Slab-Metal", "bc2" )
+        widget.add_combo_choice( "Vacuum-Slab-Metal", "bc3" )
         widget.show_conditions.append( ["assume_isolated","==","esm"] )
-        self.widgets.append(widget)
 
         #esm_w
-        widget = InputText( group_box, input_name="esm_w" )
-        widget.label = QLabel("Effective Screening Region Offset:")
-        widget.textChanged.connect( widget.on_text_changed )
+        widget = InputField( group_box, "text", label_name = "Effective Screening Region Offset:", input_name = "esm_w")
         widget.show_conditions.append( ["assume_isolated","==","esm"] )
-        self.widgets.append(widget)
 
         #esm_efield
-        widget = InputText( group_box, input_name="esm_efield" )
-        widget.label = QLabel("ESM Electric Field (Ry/a.u.):")
-        widget.textChanged.connect( widget.on_text_changed )
+        widget = InputField( group_box, "text", label_name = "ESM Electric Field (Ry/a.u.):", input_name = "esm_efield")
         widget.show_conditions.append( ["assume_isolated","==","esm"] )
         widget.show_conditions.append( ["esm_bc","==","bc2"] )
-        self.widgets.append(widget)
 
         #esm_nfit
-        widget = InputText( group_box, input_name="Number of ESM Grid Points" )
-        widget.label = QLabel("esm_nfit:")
-        widget.textChanged.connect( widget.on_text_changed )
+        widget = InputField( group_box, "text", label_name = "Number of ESM Grid Points:", input_name = "esm_nfit")
         widget.show_conditions.append( ["assume_isolated","==","esm"] )
-        self.widgets.append(widget)
 
-        button = InputButton(self, 'Next')
-        button.setToolTip('Proceed to the next input set.')
-        button.clicked.connect(group_box.on_click)
-        self.widgets.append(button)
+        widget = InputField( group_box, "button", input_name = "Next")
 
         group_box.next_group_box = 'system'
 
@@ -1546,6 +1499,8 @@ class InputField():
 
     def __init__(self, parent_, type, label_name = None, input_name = None):
 
+        self.type = type
+
         self.input_name = input_name
 
         if label_name:
@@ -1561,29 +1516,37 @@ class InputField():
 
         self.group_box = parent_
 
-        if type == "text":
+        self.group_box.widgets.append(self)
+
+        self.initialize_widget()
+
+    def initialize_widget(self):
+
+        if self.type == "text":
 
             self.widget = InputText2(self.group_box, self.input_name)
             self.widget.textChanged.connect( self.widget.on_text_changed )
 
-        elif type == "combo":
+        elif self.type == "combo":
 
             self.widget = InputCombo2(self.group_box, self.input_name)
             self.widget.currentIndexChanged.connect( self.widget.on_index_changed )
             
-        elif type == "check":
+        elif self.type == "check":
             
             self.widget = InputCheck2(self.group_box, self.input_name)
             self.widget.stateChanged.connect( self.widget.on_state_changed )
 
-
-        self.group_box.widgets.append(self)
+        elif self.type == "button":
+            
+            self.widget = InputButton2(self.group_box, self.input_name)
+            self.widget.clicked.connect(self.group_box.on_click)
         
     def add_combo_choice(self, label, name):
         
         self.widget.currentIndexChanged.disconnect()
         self.widget.addItem( label, userData = name )
-        self.widget.currentIndexChanged.connect( self.on_index_changed )
+        self.widget.currentIndexChanged.connect( self.widget.on_index_changed )
 
 
     def set_visible(self, visible):
@@ -1600,24 +1563,6 @@ class InputField():
             self.label.setVisible(visible)
             self.label.shown = visible
 
-    @pyqtSlot(str)
-    def on_text_changed(self, string):
-        
-        self.group_box.input_file.inputs[self.input_name] = string
-        self.group_box.on_update()
-        print(string)
-
-#    @pyqtSlot(int)
-    def on_index_changed(self, index):
-        
-        self.group_box.input_file.inputs[self.input_name] = self.widget.itemData(index)
-        self.group_box.on_update()
-
-#    @pyqtSlot(int)
-    def on_state_changed(self, value):
-        
-        self.group_box.input_file.inputs[self.input_name] = value
-        self.group_box.on_update()
 
 
 class InputText2(QLineEdit):
