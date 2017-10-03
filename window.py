@@ -267,23 +267,15 @@ class InputBox(QGroupBox):
 #        self.widgets.append(widget)
 
         #calculation
-        widget = InputCombo( group_box, "calculation" )
-        widget.label = QLabel("Calculation:")
-        widget.addItem("SCF (Self-Consistent Field)", userData = "scf")
-        widget.addItem("NSCF (Non-Self-Consistent Field)", userData = "nscf") #replace with maximum_iterations?
-        widget.addItem("Bands", userData = "bands") #how is this different from NSCF?
-        widget.addItem("Geometry Relaxation", userData = "relax") #note: includes vc-relax
-        widget.addItem("Molecular Dynamics", userData = "md") #note: includes vc-md
-        widget.currentIndexChanged.connect( widget.on_index_changed )
-        self.widgets.append(widget)
-
         widget = InputField( group_box, "combo", label_name = "Calculation:", input_name = "calculation")
+        widget.add_combo_choice( "SCF (Self-Consistent Field)", "scf" )
+        widget.add_combo_choice( "NSCF (Non-Self-Consistent Field)", "nscf" ) #replace with maximum_iterations?
+        widget.add_combo_choice( "Bands", "bands" ) #how is this different from NSCF?
+        widget.add_combo_choice( "Geometry Relaxation", "relax" ) #note: includes vc-relax
+        widget.add_combo_choice( "Molecular Dynamics", "md" ) #note: includes vc-md
 
         #tot_charge
-        widget = InputText( group_box, input_name="tot_charge" )
-        widget.label = QLabel("Charge:")
-        widget.textChanged.connect( widget.on_text_changed )
-        self.widgets.append(widget)
+        widget = InputField( group_box, "text", label_name = "Charge:", input_name = "tot_charge")
 
         #ecutwfc
         widget = InputText( group_box, input_name="ecutwfc" )
@@ -1569,30 +1561,30 @@ class InputField():
 
         self.group_box = parent_
 
-        if type == "combo":
+        if type == "text":
 
-            self.widget = QComboBox(parent = parent_)
+            self.widget = InputText2(self.group_box, self.input_name)
+            self.widget.textChanged.connect( self.widget.on_text_changed )
 
-            self.widget.addItem("SCF (Self-Consistent Field)", userData = "scf")
-            self.widget.addItem("NSCF (Non-Self-Consistent Field)", userData = "nscf") #replace with maximum_iterations?
-            self.widget.addItem("Bands", userData = "bands") #how is this different from NSCF?
-            self.widget.addItem("Geometry Relaxation", userData = "relax") #note: includes vc-relax
-            self.widget.addItem("Molecular Dynamics", userData = "md") #note: includes vc-md
+        elif type == "combo":
 
-            self.widget.currentIndexChanged.connect( self.on_index_changed )
+            self.widget = InputCombo2(self.group_box, self.input_name)
+            self.widget.currentIndexChanged.connect( self.widget.on_index_changed )
             
-        
-        elif type == "text":
+        elif type == "check":
+            
+            self.widget = InputCheck2(self.group_box, self.input_name)
+            self.widget.stateChanged.connect( self.widget.on_state_changed )
 
-            #initialize the input text
-            try:
-                text = self.group_box.input_file.inputs[self.input_name]
-                self.setText(text)
-            except KeyError:
-                pass
 
         self.group_box.widgets.append(self)
         
+    def add_combo_choice(self, label, name):
+        
+        self.widget.currentIndexChanged.disconnect()
+        self.widget.addItem( label, userData = name )
+        self.widget.currentIndexChanged.connect( self.on_index_changed )
+
 
     def set_visible(self, visible):
         #find my row
@@ -1608,26 +1600,96 @@ class InputField():
             self.label.setVisible(visible)
             self.label.shown = visible
 
-#    @pyqtSlot(str)
+    @pyqtSlot(str)
     def on_text_changed(self, string):
         
-        self.parent().input_file.inputs[self.input_name] = string
-        self.parent().on_update()
+        self.group_box.input_file.inputs[self.input_name] = string
+        self.group_box.on_update()
+        print(string)
 
 #    @pyqtSlot(int)
     def on_index_changed(self, index):
         
-        #self.parent().input_file.inputs[self.input_name] = self.itemData(index)
-        #self.parent().on_update()
-
         self.group_box.input_file.inputs[self.input_name] = self.widget.itemData(index)
         self.group_box.on_update()
 
 #    @pyqtSlot(int)
     def on_state_changed(self, value):
         
+        self.group_box.input_file.inputs[self.input_name] = value
+        self.group_box.on_update()
+
+
+class InputText2(QLineEdit):
+    """
+    This class represents a text box in the GUI
+    """
+
+    def __init__(self, parent_, input_name = None):
+        super(QLineEdit, self).__init__(parent = parent_)
+
+        self.input_name = input_name
+
+        #initialize the input text
+        try:
+            text = self.parent().input_file.inputs[self.input_name]
+            self.setText(text)
+        except KeyError:
+            pass
+
+    @pyqtSlot(str)
+    def on_text_changed(self, string):
+        
+        self.parent().input_file.inputs[self.input_name] = string
+        self.parent().on_update()
+
+        #print(input_file.inputs)
+
+class InputCombo2(QComboBox):
+    """
+    This class represents a drop-down box in the GUI
+    """
+
+    def __init__(self, parent_, input_name = None):
+        super(QComboBox, self).__init__(parent = parent_)
+
+        self.input_name = input_name
+
+    @pyqtSlot(int)
+    def on_index_changed(self, index):
+        
+        self.parent().input_file.inputs[self.input_name] = self.itemData(index)
+        self.parent().on_update()
+
+class InputCheck2(QCheckBox):
+    """
+    This class represents a check box in the GUI
+    """
+
+    def __init__(self, parent_, input_name = None):
+        super(QCheckBox, self).__init__(parent = parent_)
+
+        self.input_name = input_name
+
+    @pyqtSlot(int)
+    def on_state_changed(self, value):
+        
         self.parent().input_file.inputs[self.input_name] = value
         self.parent().on_update()
+
+class InputButton2(QPushButton):
+    """
+    This class represents a button in the GUI
+    """
+
+    def __init__(self, parent_, input_name = None):
+        super(QPushButton, self).__init__(input_name, parent = parent_)
+
+        self.input_name = input_name
+
+
+
+
 
 
 
