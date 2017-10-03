@@ -1151,22 +1151,22 @@ class InputField():
 
         if self.type == "text":
 
-            self.widget = InputText2(self.group_box, self.input_name)
+            self.widget = InputText(self.group_box, self.input_name)
             self.widget.textChanged.connect( self.widget.on_text_changed )
 
         elif self.type == "combo":
 
-            self.widget = InputCombo2(self.group_box, self.input_name)
+            self.widget = InputCombo(self.group_box, self.input_name)
             self.widget.currentIndexChanged.connect( self.widget.on_index_changed )
             
         elif self.type == "check":
             
-            self.widget = InputCheck2(self.group_box, self.input_name)
+            self.widget = InputCheck(self.group_box, self.input_name)
             self.widget.stateChanged.connect( self.widget.on_state_changed )
 
         elif self.type == "button":
             
-            self.widget = InputButton2(self.group_box, self.input_name)
+            self.widget = InputButton(self.group_box, self.input_name)
             self.widget.clicked.connect(self.group_box.on_click)
         
     def add_combo_choice(self, label, name):
@@ -1212,81 +1212,6 @@ class InputField():
                 
 
 
-class InputText2(QLineEdit):
-    """
-    This class represents a text box in the GUI
-    """
-
-    def __init__(self, parent_, input_name = None):
-        super(QLineEdit, self).__init__(parent = parent_)
-
-        self.input_name = input_name
-
-        #initialize the input text
-        try:
-            text = self.parent().input_file.inputs[self.input_name]
-            self.setText(text)
-        except KeyError:
-            pass
-
-    @pyqtSlot(str)
-    def on_text_changed(self, string):
-        
-        self.parent().input_file.inputs[self.input_name] = string
-        self.parent().on_update()
-
-        #print(input_file.inputs)
-
-class InputCombo2(QComboBox):
-    """
-    This class represents a drop-down box in the GUI
-    """
-
-    def __init__(self, parent_, input_name = None):
-        super(QComboBox, self).__init__(parent = parent_)
-
-        self.input_name = input_name
-
-    @pyqtSlot(int)
-    def on_index_changed(self, index):
-        
-        self.parent().input_file.inputs[self.input_name] = self.itemData(index)
-        self.parent().on_update()
-
-class InputCheck2(QCheckBox):
-    """
-    This class represents a check box in the GUI
-    """
-
-    def __init__(self, parent_, input_name = None):
-        super(QCheckBox, self).__init__(parent = parent_)
-
-        self.input_name = input_name
-
-    @pyqtSlot(int)
-    def on_state_changed(self, value):
-        
-        self.parent().input_file.inputs[self.input_name] = value
-        self.parent().on_update()
-
-class InputButton2(QPushButton):
-    """
-    This class represents a button in the GUI
-    """
-
-    def __init__(self, parent_, input_name = None):
-        super(QPushButton, self).__init__(input_name, parent = parent_)
-
-        self.input_name = input_name
-
-
-
-
-
-
-
-
-
 class InputText(QLineEdit):
     """
     This class represents a text box in the GUI
@@ -1297,35 +1222,12 @@ class InputText(QLineEdit):
 
         self.input_name = input_name
 
-        #does this widget have a label widget?
-        self.label = None
-
-        #is this widget currently being shown to the user?
-        self.shown = False
-
-        #conditions under which this text box should be shown
-        self.show_conditions = []
-
         #initialize the input text
         try:
             text = self.parent().input_file.inputs[self.input_name]
             self.setText(text)
         except KeyError:
             pass
-
-    def set_visible(self, visible):
-        #find my row
-        #layout = self.parent().layout
-        #pos = layout.getWidgetPosition(self)
-        #print(pos)
-        #print(pos[0])
-
-        self.setVisible(visible)
-        self.shown = visible
-        
-        if self.label:
-            self.label.setVisible(visible)
-            self.label.shown = visible
 
     @pyqtSlot(str)
     def on_text_changed(self, string):
@@ -1334,12 +1236,6 @@ class InputText(QLineEdit):
         self.parent().on_update()
 
         #print(input_file.inputs)
-
-
-
-
-
-
 
 class InputCombo(QComboBox):
     """
@@ -1351,32 +1247,11 @@ class InputCombo(QComboBox):
 
         self.input_name = input_name
 
-        #does this widget have a label widget?
-        self.label = None
-
-        #is this widget currently being shown to the user?
-        self.shown = False
-
-        #conditions under which this drop-down box should be shown
-        self.show_conditions = []
-
-    def set_visible(self, visible):
-        self.setVisible(visible)
-        self.shown = visible
-        
-        if self.label:
-            self.label.setVisible(visible)
-            self.label.shown = visible
-
     @pyqtSlot(int)
     def on_index_changed(self, index):
         
         self.parent().input_file.inputs[self.input_name] = self.itemData(index)
         self.parent().on_update()
-
-
-
-
 
 class InputCheck(QCheckBox):
     """
@@ -1388,32 +1263,11 @@ class InputCheck(QCheckBox):
 
         self.input_name = input_name
 
-        #does this widget have a label widget?
-        self.label = None
-
-        #is this widget currently being shown to the user?
-        self.shown = False
-
-        #conditions under which this check box should be shown
-        self.show_conditions = []
-
-    def set_visible(self, visible):
-        self.setVisible(visible)
-        self.shown = visible
-        
-        if self.label:
-            self.label.setVisible(visible)
-            self.label.shown = visible
-
     @pyqtSlot(int)
     def on_state_changed(self, value):
         
         self.parent().input_file.inputs[self.input_name] = value
         self.parent().on_update()
-
-
-
-
 
 class InputButton(QPushButton):
     """
@@ -1425,28 +1279,10 @@ class InputButton(QPushButton):
 
         self.input_name = input_name
 
-        #does this widget have a label widget?
-        self.label = None
 
-        #is this widget currently being shown to the user?
-        self.shown = False
 
-        #conditions under which this check box should be shown
-        self.show_conditions = []
 
-    def set_visible(self, visible):
-        self.setVisible(visible)
-        self.shown = visible
-        
-        if self.label:
-            self.label.setVisible(visible)
-            self.label.shown = visible
 
-#    @pyqtSlot(int)
-#    def on_state_changed(self, value):
-#        
-#        self.parent().input_file.inputs[self.input_name] = value
-#        self.parent().on_update()
 
 
 
