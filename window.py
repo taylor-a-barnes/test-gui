@@ -57,6 +57,14 @@ class Dialog(QDialog):
         
         self.group_boxes.append(group_box)
 
+        self.boxes_layout.addWidget(group_box)
+
+        group_box.update_visibility()
+
+        #if the new group box is not visible, create the next one
+        if not group_box.shown:
+            self.create_box(group_box.next_group_box)
+
         return group_box
 
     def on_window_update(self):
@@ -116,6 +124,7 @@ class InputBox(QGroupBox):
 
         #conditions under which this group box should be shown
         self.show_conditions = []
+        self.shown = True
 
 
     def initialize_widgets(self):
@@ -144,6 +153,7 @@ class InputBox(QGroupBox):
             self.create_cell_box()
         elif self.group_name == 'hubbard':
             self.create_hubbard_box()
+            self.show_conditions.append( [ ["GUI_exx_corr","==","dft+u"], "or", ["GUI_exx_corr","==","dft+u+j"] ] )
         elif self.group_name == 'system':
             self.create_system_box()
         elif self.group_name == 'vdw':
@@ -177,7 +187,21 @@ class InputBox(QGroupBox):
         print("end of initialize_widgets")
         print(self.window())
 
+    def update_visibility(self):
+
+        #if this group should not be shown, hide it and then initialize the next box
+        should_show = self.check_show_conditions(self)
+
+        if should_show:
+            self.setVisible(True)
+            self.shown = True
+        else:
+            self.setVisible(False)
+            self.shown = False
+            #self.window().create_box(self.next_group_box)
+
     def apply_layout(self):
+
         for w in self.widgets:
 
             try:
@@ -185,7 +209,6 @@ class InputBox(QGroupBox):
                     self.layout.addRow( w.label, w.widget )
                 else:
                     self.layout.addRow( w.widget )
-                print("HERE")
 
             except AttributeError: #legacy code - delete when possible
                 try: #check if the widget has a label
@@ -209,6 +232,8 @@ class InputBox(QGroupBox):
         self.widgets = []
 
     def update_layout(self):
+
+        self.update_visibility()
         
         for w in self.widgets:
 
@@ -277,7 +302,7 @@ class InputBox(QGroupBox):
         widget.add_combo_choice( "Molecular Dynamics", "md" ) #note: includes vc-md
 
         #tot_charge
-        widget = InputField( group_box, "text", label_name = "Charge:", input_name = "tot_charge")
+        widget = InputField( group_box, "text", label_name = "System Charge:", input_name = "tot_charge")
 
         #ecutwfc
         widget = InputField( group_box, "text", label_name = "ecutwfc:", input_name = "ecutwfc")
@@ -1486,9 +1511,8 @@ class InputBox(QGroupBox):
 
         print('PyQt5 button click')
 
-        #create the box for system information
-        self.window().system_box = self.window().create_box(self.next_group_box)
-        self.window().boxes_layout.addWidget(self.window().system_box)
+        #create the next group box
+        self.window().create_box(self.next_group_box)
 
 
 
