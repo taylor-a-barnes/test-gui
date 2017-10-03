@@ -181,11 +181,13 @@ class InputBox(QGroupBox):
         for w in self.widgets:
 
             try:
-                self.layout.addRow( w.label, w.widget )
+                if w.label:
+                    self.layout.addRow( w.label, w.widget )
+                else:
+                    self.layout.addRow( w.widget )
                 print("HERE")
 
-            except AttributeError:
-#                pass
+            except AttributeError: #legacy code - delete when possible
                 try: #check if the widget has a label
                     self.layout.addRow( w.label, w)
                 except AttributeError:
@@ -1500,19 +1502,17 @@ class InputField():
     def __init__(self, parent_, type, label_name = None, input_name = None):
 
         self.type = type
-
+        self.label_name = label_name
         self.input_name = input_name
-
-        if label_name:
-            self.label = QLabel(label_name)
-        else:
-            self.label = None
 
         #is this widget currently being shown to the user?
         self.shown = False
 
         #conditions under which this text box should be shown
         self.show_conditions = []
+
+        #list of all possible combo choices
+        self.combo_choices = []
 
         self.group_box = parent_
 
@@ -1521,6 +1521,11 @@ class InputField():
         self.initialize_widget()
 
     def initialize_widget(self):
+
+        if self.label_name:
+            self.label = QLabel(self.label_name)
+        else:
+            self.label = None
 
         if self.type == "text":
 
@@ -1548,21 +1553,41 @@ class InputField():
         self.widget.addItem( label, userData = name )
         self.widget.currentIndexChanged.connect( self.widget.on_index_changed )
 
+        #self.combo_choices.append( (label,name) )
+        self.combo_choices.append( (label,name) )
+
 
     def set_visible(self, visible):
-        #find my row
-        #layout = self.parent().layout
-        #pos = layout.getWidgetPosition(self)
-        #print(pos)
-        #print(pos[0])
-
-        self.widget.setVisible(visible)
-        self.shown = visible
         
-        if self.label:
-            self.label.setVisible(visible)
-            self.label.shown = visible
+        if visible:
+            #create a new widget
+            self.initialize_widget()
+            self.shown = True
 
+            #determine where this new row needs to be inserted
+            index = self.group_box.widgets.index(self)
+
+            if self.label:
+                self.group_box.layout.insertRow( index, self.label, self.widget )
+            else:
+                self.group_box.layout.insertRow( index, self.widget )
+
+            if self.type == "combo":
+                #add all of the combo choices to the new widget
+                temp_choices = [ self.combo_choices[i] for i in range(len(self.combo_choices)) ]
+                self.combo_choices = []
+                for combo_choice in temp_choices:
+                    self.add_combo_choice(combo_choice[0],combo_choice[1])
+
+        else:
+            #delete this widget
+            self.widget.deleteLater()
+            self.widget = None
+            self.shown = False
+            if self.label:
+                self.label.deleteLater()
+                self.label = None
+                
 
 
 class InputText2(QLineEdit):
