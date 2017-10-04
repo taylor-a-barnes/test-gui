@@ -88,6 +88,7 @@ class Dialog(QDialog):
 #probably shouldn't include:
 #title
 #space_group, uniqueb, origin_choice, rhombohedral
+#ion_positions
 
 #not sure where to place:
 #no_t_rev
@@ -165,6 +166,15 @@ class InputBox(QGroupBox):
         elif self.group_name == 'md':
             self.create_md_box()
             self.show_conditions.append( ["calculation","==","md"] )
+        elif self.group_name == 'relaxation':
+            self.create_ions_box()
+            self.show_conditions.append( ["calculation","==","relax"] )
+        elif self.group_name == 'cell dynamics':
+            self.create_celld_box()
+            self.show_conditions.append( [ [ ["calculation","==","relax"], "and", 
+                                           ["GUI_variable_cell","==",2] ], "or", 
+                                           [ ["calculation","==","md"], "and", 
+                                             ["GUI_variable_cell","==",2] ] ] )
         elif self.group_name == 'magnetization':
             self.create_magnetization_box()
             self.show_conditions.append( [ ["nspin","==","2"], 
@@ -178,14 +188,11 @@ class InputBox(QGroupBox):
                                            "or", ["GUI_efield_type","==","lefield"] ] )
         elif self.group_name == 'monopole':
             self.create_monopole_box()
+            self.show_conditions.append( ["GUI_charge_type","==","monopole"] )
         elif self.group_name == 'kpoint':
             self.create_kpoint_box()
         elif self.group_name == 'electrons':
             self.create_electrons_box()
-        elif self.group_name == 'ions':
-            self.create_ions_box()
-        elif self.group_name == 'cell dynamics':
-            self.create_celld_box()
         elif self.group_name == 'print':
             self.create_print_box()
         else:
@@ -321,11 +328,15 @@ class InputBox(QGroupBox):
         widget.add_combo_choice( "Geometry Relaxation", "relax" ) #note: includes vc-relax
         widget.add_combo_choice( "Molecular Dynamics", "md" ) #note: includes vc-md
 
+        #GUI_charge_type
+        widget = InputField( group_box, "combo", label_name = "Charge Type:", input_name = "GUI_charge_type")
+        widget.add_combo_choice( "Neutral", "neutral" )
+        widget.add_combo_choice( "Charged (Counter With Homogenous Background)", "homogeneous" )
+        widget.add_combo_choice( "Charged (Counter With Charged Plate)", "monopole" )
+
         #tot_charge
         widget = InputField( group_box, "text", label_name = "System Charge:", input_name = "tot_charge")
-
-        #ecutwfc
-        widget = InputField( group_box, "text", label_name = "ecutwfc:", input_name = "ecutwfc")
+        widget.show_conditions.append( ["GUI_charge_type","!=","neutral"] )
 
         #GUI_exx_corr (custom)
         widget = InputField( group_box, "combo", label_name = "Exchange Correction:", input_name = "GUI_exx_corr")
@@ -382,6 +393,11 @@ class InputBox(QGroupBox):
         widget.add_combo_choice( "Monoclinic P, unique axis b", "-12" )
         widget.add_combo_choice( "Base-Centered Monoclinic", "13" )
         widget.add_combo_choice( "Triclinic", "14" )
+
+        #GUI_lattice_vector
+        #widget = InputField( group_box, "plain_text", label_name = "Lattice Vector:", input_name = "GUI_lattice_vector")
+        #widget.widget.setMinimumWidth(500)
+        #widget.widget.setMinimumHeight(300)
         
         #v1
         widget = InputField( group_box, "text", label_name = "v1:", input_name = "v1")
@@ -430,8 +446,57 @@ class InputBox(QGroupBox):
 
         widget = InputField( group_box, "button", input_name = "Next")
 
-        group_box.next_group_box = 'system'
+        group_box.next_group_box = 'cell dynamics'
 
+
+
+    #--------------------------------------------------------#
+    # Cell Dynamics Inputs
+    #--------------------------------------------------------#
+    def create_celld_box(self):
+        group_box = self
+
+        #cell_dynamics
+        widget = InputField( group_box, "combo", label_name = "cell_dynamics:", input_name = "cell_dynamics")
+        widget.add_combo_choice( "none", "none" )
+        widget.add_combo_choice( "sd", "sd" )
+        widget.add_combo_choice( "damp-pr", "damp-pr" )
+        widget.add_combo_choice( "damp-w", "damp-w" )
+        widget.add_combo_choice( "bfgs", "bfgs" )
+        widget.add_combo_choice( "none", "none" )
+        widget.add_combo_choice( "pr", "pr" )
+        widget.add_combo_choice( "w", "w" )
+
+        #press
+        widget = InputField( group_box, "text", label_name = "press:", input_name = "press")
+
+        #wmass
+        widget = InputField( group_box, "text", label_name = "wmass:", input_name = "wmass")
+
+        #cell_factor
+        widget = InputField( group_box, "text", label_name = "cell_factor:", input_name = "cell_factor")
+
+        #press_conv_thr
+        widget = InputField( group_box, "text", label_name = "press_conv_thr:", input_name = "press_conv_thr")
+
+        #cell_dofree
+        widget = InputField( group_box, "combo", label_name = "cell_dofree:", input_name = "cell_dofree")
+        widget.add_combo_choice( "all", "all" )
+        widget.add_combo_choice( "x", "x" )
+        widget.add_combo_choice( "y", "y" )
+        widget.add_combo_choice( "z", "z" )
+        widget.add_combo_choice( "xy", "xy" )
+        widget.add_combo_choice( "xz", "xz" )
+        widget.add_combo_choice( "yz", "yz" )
+        widget.add_combo_choice( "xyz", "xyz" )
+        widget.add_combo_choice( "shape", "shape" )
+        widget.add_combo_choice( "volume", "volume" )
+        widget.add_combo_choice( "2Dxy", "2Dxy" )
+        widget.add_combo_choice( "2Dshape", "2Dshape" )
+
+        widget = InputField( group_box, "button", input_name = "Next")
+
+        group_box.next_group_box = 'system'
 
         
 
@@ -441,6 +506,9 @@ class InputBox(QGroupBox):
     #--------------------------------------------------------#
     def create_system_box(self):
         group_box = self
+
+        #ecutwfc
+        widget = InputField( group_box, "text", label_name = "ecutwfc:", input_name = "ecutwfc")
 
         #input_dft
         widget = InputField( group_box, "combo", label_name = "DFT Functional:", input_name = "input_dft")
@@ -468,9 +536,6 @@ class InputBox(QGroupBox):
         #nbnd
         widget = InputField( group_box, "text", label_name = "Number of Bands:", input_name = "nbnd")
 
-        #tot_magnetization
-        widget = InputField( group_box, "text", label_name = "tot_magnetization:", input_name = "tot_magnetization")
-
         #ecutrho
         widget = InputField( group_box, "text", label_name = "ecutrho:", input_name = "ecutrho")
 
@@ -494,11 +559,13 @@ class InputBox(QGroupBox):
         widget.add_combo_choice( "Methfessel-Paxton", "methfessel-paxton" )
         widget.add_combo_choice( "Marzari-Vanderbilt", "marzari-vanderbilt" )
         widget.add_combo_choice( "Fermi-Dirac", "Fermi-Dirac" )
+        widget.show_conditions.append( ["occupations","==","smearing"] )
         
 #NOTE: default to Marzari-Vanderbilt 'cold smearing'
 
         #degauss
         widget = InputField( group_box, "text", label_name = "degauss:", input_name = "degauss")
+        widget.show_conditions.append( ["occupations","==","smearing"] )
 
 #NOTE: degauss has suggested values of 0.06-0.10 Ry
 
@@ -652,11 +719,109 @@ class InputBox(QGroupBox):
         widget.add_combo_choice( "beeman", "beeman" )
         widget.show_conditions.append( ["GUI_variable_cell","==",2] )
 
+        #pot_extrapolation
+        widget = InputField( group_box, "combo", label_name = "Potential Extrapolation:", input_name = "pot_extrapolation")
+        widget.add_combo_choice( "None", "none" )
+        widget.add_combo_choice( "Atomic", "atomic" )
+        widget.add_combo_choice( "First-Order", "first_order" )
+        widget.add_combo_choice( "Second-Order", "first_order" )
+
+        #wfc_extrapolation
+        widget = InputField( group_box, "combo", label_name = "Wavefunction Extrapolation:", input_name = "wfc_extrapolation")
+        widget.add_combo_choice( "None", "none" )
+        widget.add_combo_choice( "First-Order", "first_order" )
+        widget.add_combo_choice( "Second-Order", "first_order" )
+
+        #remove_rigid_rot
+        widget = InputField( group_box, "check", label_name = "remove_rigid_rot:", input_name = "remove_rigid_rot")
+        widget.show_conditions.append( ["assume_isolated","!=","none"] )
+
+        #ion_temperature
+        widget = InputField( group_box, "combo", label_name = "ion_temperature:", input_name = "ion_temperature")
+        widget.add_combo_choice( "rescaling", "rescaling" )
+        widget.add_combo_choice( "rescale-v", "rescale-v" )
+        widget.add_combo_choice( "rescale-T", "rescale-T" )
+        widget.add_combo_choice( "reduce-T", "reduce-T" )
+        widget.add_combo_choice( "berendsen", "berendsen" )
+        widget.add_combo_choice( "andersen", "andersen" )
+        widget.add_combo_choice( "initial", "initial" )
+        widget.add_combo_choice( "not_controlled", "not_controlled" )
+
+        #tempw
+        widget = InputField( group_box, "text", label_name = "tempw:", input_name = "tempw")
+
+        #tolp
+        widget = InputField( group_box, "text", label_name = "tolp:", input_name = "tolp")
+
+        #delta_t
+        widget = InputField( group_box, "text", label_name = "delta_t:", input_name = "delta_t")
+
+        #nraise
+        widget = InputField( group_box, "text", label_name = "nraise:", input_name = "nraise")
+
+        #refold_pos
+        widget = InputField( group_box, "check", label_name = "refold_pos:", input_name = "refold_pos")
+
+        widget = InputField( group_box, "button", input_name = "Next")
+
+        group_box.next_group_box = 'relaxation'
+
+
+
+    #--------------------------------------------------------#
+    # Ions Inputs NOTE: ONLY FOR RELAXATION CALCULATIONS
+    #--------------------------------------------------------#
+    def create_ions_box(self):
+        group_box = self
+
+        #ion_dynamics
+        widget = InputField( group_box, "combo", label_name = "ion_dynamics:", input_name = "ion_dynamics")
+        widget.add_combo_choice( "bfgs", "bfgs" )
+        widget.add_combo_choice( "damp", "damp" )
+
+        #ion_positions
+#        widget = InputField( group_box, "combo", label_name = "ion_positions:", input_name = "ion_positions")
+#        widget.add_combo_choice( "default", "default" )
+#        widget.add_combo_choice( "from_input", "from_input" )
+
+        #pot_extrapolation
+        widget = InputField( group_box, "combo", label_name = "Potential Extrapolation:", input_name = "pot_extrapolation")
+        widget.add_combo_choice( "None", "none" )
+        widget.add_combo_choice( "Atomic", "atomic" )
+        widget.add_combo_choice( "First-Order", "first_order" )
+        widget.add_combo_choice( "Second-Order", "first_order" )
+
+        #wfc_extrapolation
+        widget = InputField( group_box, "combo", label_name = "Wavefunction Extrapolation:", input_name = "wfc_extrapolation")
+        widget.add_combo_choice( "None", "none" )
+        widget.add_combo_choice( "First-Order", "first_order" )
+        widget.add_combo_choice( "Second-Order", "first_order" )
+
+        #remove_rigid_rot
+        widget = InputField( group_box, "check", label_name = "remove_rigid_rot:", input_name = "remove_rigid_rot")
+        widget.show_conditions.append( ["assume_isolated","!=","none"] )
+
+        #upscale
+        widget = InputField( group_box, "text", label_name = "upscale:", input_name = "upscale")
+
+        #bfgs_ndim
+        widget = InputField( group_box, "text", label_name = "bfgs_ndim:", input_name = "bfgs_ndim")
+
+        #trust_radius_min
+        widget = InputField( group_box, "text", label_name = "trust_radius_min:", input_name = "trust_radius_min")
+
+        #trust_radius_ini
+        widget = InputField( group_box, "text", label_name = "trust_radius_ini:", input_name = "trust_radius_ini")
+
+        #w_1
+        widget = InputField( group_box, "text", label_name = "w_1:", input_name = "w_1")
+
+        #w_2
+        widget = InputField( group_box, "text", label_name = "w_2:", input_name = "w_2")
 
         widget = InputField( group_box, "button", input_name = "Next")
 
         group_box.next_group_box = 'magnetization'
-
 
 
 
@@ -665,6 +830,9 @@ class InputBox(QGroupBox):
     #--------------------------------------------------------#
     def create_magnetization_box(self):
         group_box = self
+
+        #tot_magnetization
+        widget = InputField( group_box, "text", label_name = "tot_magnetization:", input_name = "tot_magnetization")
 
         #starting_spin_angle
         widget = InputField( group_box, "check", label_name = "starting_spin_angle:", input_name = "starting_spin_angle")
@@ -787,9 +955,6 @@ class InputBox(QGroupBox):
         #fcp_mu
         widget = InputField( group_box, "text", label_name = "fcp_mu:", input_name = "fcp_mu")
 
-        #monopole
-        widget = InputField( group_box, "check", label_name = "monopole:", input_name = "monopole")
-
         widget = InputField( group_box, "button", input_name = "Next")
 
         group_box.next_group_box = 'monopole'
@@ -800,6 +965,9 @@ class InputBox(QGroupBox):
     #--------------------------------------------------------#
     def create_monopole_box(self):
         group_box = self
+
+        #monopole
+        widget = InputField( group_box, "check", label_name = "monopole:", input_name = "monopole")
 
         #zmon
         widget = InputField( group_box, "text", label_name = "zmon:", input_name = "zmon")
@@ -852,52 +1020,77 @@ class InputBox(QGroupBox):
     def create_electrons_box(self):
         group_box = self
 
+        #GUI_convergence_standards
+        widget = InputField( group_box, "combo", label_name = "Convergence Standards:", input_name = "GUI_convergence_standards")
+        widget.add_combo_choice( "Low", "low" )
+        widget.add_combo_choice( "Medium", "medium" )
+        widget.add_combo_choice( "High", "high" )
+        widget.add_combo_choice( "Custom", "custom" )
+
         #electron_maxstep
         widget = InputField( group_box, "text", label_name = "electron_maxstep:", input_name = "electron_maxstep")
+        widget.show_conditions.append( ["GUI_convergence_standards","==","custom"] )
 
         #scf_must_converge
         widget = InputField( group_box, "check", label_name = "scf_must_converge:", input_name = "scf_must_converge")
+        widget.show_conditions.append( ["GUI_convergence_standards","==","custom"] )
 
         #conv_thr
         widget = InputField( group_box, "text", label_name = "conv_thr:", input_name = "conv_thr")
+        widget.show_conditions.append( ["GUI_convergence_standards","==","custom"] )
 
         #adaptive_thr
         widget = InputField( group_box, "check", label_name = "adaptive_thr:", input_name = "adaptive_thr")
+        widget.show_conditions.append( ["GUI_convergence_standards","==","custom"] )
 
         #conv_thr_init
         widget = InputField( group_box, "text", label_name = "conv_thr_init:", input_name = "conv_thr_init")
+        widget.show_conditions.append( ["GUI_convergence_standards","==","custom"] )
 
         #conv_thr_multi
         widget = InputField( group_box, "text", label_name = "conv_thr_multi:", input_name = "conv_thr_multi")
+        widget.show_conditions.append( ["GUI_convergence_standards","==","custom"] )
+
+        #diago_thr_init
+        widget = InputField( group_box, "text", label_name = "diago_thr_init:", input_name = "diago_thr_init")
+        widget.show_conditions.append( ["GUI_convergence_standards","==","custom"] )
+
+        #GUI_convergence_acceleration
+        widget = InputField( group_box, "combo", label_name = "Convergence Acceleration:", input_name = "GUI_convergence_acceleration")
+        widget.add_combo_choice( "Default", "default" )
+        widget.add_combo_choice( "Custom", "custom" )
 
         #mixing_mode
         widget = InputField( group_box, "combo", label_name = "mixing_mode:", input_name = "mixing_mode")
         widget.add_combo_choice( "Plain", "plain" )
         widget.add_combo_choice( "TF", "TF" )
         widget.add_combo_choice( "Local-TF", "local-TF" )
+        widget.show_conditions.append( ["GUI_convergence_acceleration","==","custom"] )
 
         #mixing_beta
         widget = InputField( group_box, "text", label_name = "mixing_beta:", input_name = "mixing_beta")
+        widget.show_conditions.append( ["GUI_convergence_acceleration","==","custom"] )
 
         #mixing_ndim
         widget = InputField( group_box, "text", label_name = "mixing_ndim:", input_name = "mixing_ndim")
+        widget.show_conditions.append( ["GUI_convergence_acceleration","==","custom"] )
 
         #mixing_fixed_ns
         widget = InputField( group_box, "text", label_name = "mixing_fixed_ns:", input_name = "mixing_fixed_ns")
+        widget.show_conditions.append( ["GUI_convergence_acceleration","==","custom"] )
 
         #diagonalization
         widget = InputField( group_box, "combo", label_name = "diagonalization:", input_name = "diagonalization")
         widget.add_combo_choice( "david", "david" )
         widget.add_combo_choice( "cg", "cg" )
 
-        #diago_thr_init
-        widget = InputField( group_box, "text", label_name = "diago_thr_init:", input_name = "diago_thr_init")
-
         #diago_cg_maxiter
         widget = InputField( group_box, "text", label_name = "diago_cg_maxiter:", input_name = "diago_cg_maxiter")
+        widget.show_conditions.append( ["diagonalization","==","cg"] )
 
         #diago_david_ndim
         widget = InputField( group_box, "text", label_name = "diago_david_ndim:", input_name = "diago_david_ndim")
+        widget.show_conditions.append( ["diagonalization","==","david"] )
 
         #diago_full_acc
         widget = InputField( group_box, "text", label_name = "diago_full_acc:", input_name = "diago_full_acc")
@@ -916,138 +1109,6 @@ class InputBox(QGroupBox):
 
         #tqr
         widget = InputField( group_box, "check", label_name = "tqr:", input_name = "tqr")
-
-        widget = InputField( group_box, "button", input_name = "Next")
-
-        group_box.next_group_box = 'ions'
-
-
-
-    #--------------------------------------------------------#
-    # Ions Inputs NOTE: ONLY FOR RELAXATION CALCULATIONS
-    #--------------------------------------------------------#
-    def create_ions_box(self):
-        group_box = self
-
-        #ion_dynamics
-        widget = InputField( group_box, "combo", label_name = "ion_dynamics:", input_name = "ion_dynamics")
-        widget.add_combo_choice( "bfgs", "bfgs" )
-        widget.add_combo_choice( "damp", "damp" )
-
-        #ion_positions
-#        widget = InputField( group_box, "combo", label_name = "ion_positions:", input_name = "ion_positions")
-#        widget.add_combo_choice( "default", "default" )
-#        widget.add_combo_choice( "from_input", "from_input" )
-
-        #pot_extrapolation
-        widget = InputField( group_box, "combo", label_name = "Potential Extrapolation:", input_name = "pot_extrapolation")
-        widget.add_combo_choice( "None", "none" )
-        widget.add_combo_choice( "Atomic", "atomic" )
-        widget.add_combo_choice( "First-Order", "first_order" )
-        widget.add_combo_choice( "Second-Order", "first_order" )
-
-        #wfc_extrapolation
-        widget = InputField( group_box, "combo", label_name = "Wavefunction Extrapolation:", input_name = "wfc_extrapolation")
-        widget.add_combo_choice( "None", "none" )
-        widget.add_combo_choice( "First-Order", "first_order" )
-        widget.add_combo_choice( "Second-Order", "first_order" )
-
-        #remove_rigid_rot
-        widget = InputField( group_box, "check", label_name = "remove_rigid_rot:", input_name = "remove_rigid_rot")
-        widget.show_conditions.append( ["assume_isolated","!=","none"] )
-
-        #ion_temperature
-        widget = InputField( group_box, "combo", label_name = "ion_temperature:", input_name = "ion_temperature")
-        widget.add_combo_choice( "rescaling", "rescaling" )
-        widget.add_combo_choice( "rescale-v", "rescale-v" )
-        widget.add_combo_choice( "rescale-T", "rescale-T" )
-        widget.add_combo_choice( "reduce-T", "reduce-T" )
-        widget.add_combo_choice( "berendsen", "berendsen" )
-        widget.add_combo_choice( "andersen", "andersen" )
-        widget.add_combo_choice( "initial", "initial" )
-        widget.add_combo_choice( "not_controlled", "not_controlled" )
-
-        #tempw
-        widget = InputField( group_box, "text", label_name = "tempw:", input_name = "tempw")
-
-        #tolp
-        widget = InputField( group_box, "text", label_name = "tolp:", input_name = "tolp")
-
-        #delta_t
-        widget = InputField( group_box, "text", label_name = "delta_t:", input_name = "delta_t")
-
-        #nraise
-        widget = InputField( group_box, "text", label_name = "nraise:", input_name = "nraise")
-
-        #refold_pos
-        widget = InputField( group_box, "check", label_name = "refold_pos:", input_name = "refold_pos")
-
-        #upscale
-        widget = InputField( group_box, "text", label_name = "upscale:", input_name = "upscale")
-
-        #bfgs_ndim
-        widget = InputField( group_box, "text", label_name = "bfgs_ndim:", input_name = "bfgs_ndim")
-
-        #trust_radius_min
-        widget = InputField( group_box, "text", label_name = "trust_radius_min:", input_name = "trust_radius_min")
-
-        #trust_radius_ini
-        widget = InputField( group_box, "text", label_name = "trust_radius_ini:", input_name = "trust_radius_ini")
-
-        #w_1
-        widget = InputField( group_box, "text", label_name = "w_1:", input_name = "w_1")
-
-        #w_2
-        widget = InputField( group_box, "text", label_name = "w_2:", input_name = "w_2")
-
-        widget = InputField( group_box, "button", input_name = "Next")
-
-        group_box.next_group_box = 'cell dynamics'
-
-
-    #--------------------------------------------------------#
-    # Cell Dynamics Inputs
-    #--------------------------------------------------------#
-    def create_celld_box(self):
-        group_box = self
-
-        #cell_dynamics
-        widget = InputField( group_box, "combo", label_name = "cell_dynamics:", input_name = "cell_dynamics")
-        widget.add_combo_choice( "none", "none" )
-        widget.add_combo_choice( "sd", "sd" )
-        widget.add_combo_choice( "damp-pr", "damp-pr" )
-        widget.add_combo_choice( "damp-w", "damp-w" )
-        widget.add_combo_choice( "bfgs", "bfgs" )
-        widget.add_combo_choice( "none", "none" )
-        widget.add_combo_choice( "pr", "pr" )
-        widget.add_combo_choice( "w", "w" )
-
-        #press
-        widget = InputField( group_box, "text", label_name = "press:", input_name = "press")
-
-        #wmass
-        widget = InputField( group_box, "text", label_name = "wmass:", input_name = "wmass")
-
-        #cell_factor
-        widget = InputField( group_box, "text", label_name = "cell_factor:", input_name = "cell_factor")
-
-        #press_conv_thr
-        widget = InputField( group_box, "text", label_name = "press_conv_thr:", input_name = "press_conv_thr")
-
-        #cell_dofree
-        widget = InputField( group_box, "combo", label_name = "cell_dofree:", input_name = "cell_dofree")
-        widget.add_combo_choice( "all", "all" )
-        widget.add_combo_choice( "x", "x" )
-        widget.add_combo_choice( "y", "y" )
-        widget.add_combo_choice( "z", "z" )
-        widget.add_combo_choice( "xy", "xy" )
-        widget.add_combo_choice( "xz", "xz" )
-        widget.add_combo_choice( "yz", "yz" )
-        widget.add_combo_choice( "xyz", "xyz" )
-        widget.add_combo_choice( "shape", "shape" )
-        widget.add_combo_choice( "volume", "volume" )
-        widget.add_combo_choice( "2Dxy", "2Dxy" )
-        widget.add_combo_choice( "2Dshape", "2Dshape" )
 
         widget = InputField( group_box, "button", input_name = "Next")
 
