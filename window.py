@@ -267,13 +267,23 @@ class InputBox(QGroupBox):
         show = True
 
         for condition in widget.show_conditions:
-            if self.evaluate_condition(condition) == False:
-                show = False
+
+
+            if condition[0] == "not_pressed": #show as long as the button has not been pressed
+            
+                if widget.was_pressed:
+                    show = False
+                print(show)
+
+            else:
+
+                if self.evaluate_condition(condition) == False:
+                    show = False
 
         return show
 
     def evaluate_condition(self, condition):
-        
+
         try:
         
             #evaluate this condition
@@ -290,7 +300,7 @@ class InputBox(QGroupBox):
                     return False
 
             elif condition[1] == "!=":
-
+                
                 if input == condition[2]:
                     return False
                 else:
@@ -365,6 +375,7 @@ class InputBox(QGroupBox):
         widget.add_combo_choice( "Homogeneous", "lefield" )
 
         widget = InputField( group_box, "button", input_name = "Next")
+        widget.show_conditions.append( ["not_pressed"] )
 
         group_box.next_group_box = 'cell'
 
@@ -444,6 +455,7 @@ class InputBox(QGroupBox):
         widget.show_conditions.append( ["assume_isolated","==","esm"] )
 
         widget = InputField( group_box, "button", input_name = "Next")
+        widget.show_conditions.append( ["not_pressed"] )
 
         group_box.next_group_box = 'cell dynamics'
 
@@ -494,6 +506,7 @@ class InputBox(QGroupBox):
         widget.add_combo_choice( "2Dshape", "2Dshape" )
 
         widget = InputField( group_box, "button", input_name = "Next")
+        widget.show_conditions.append( ["not_pressed"] )
 
         group_box.next_group_box = 'system'
 
@@ -600,6 +613,7 @@ class InputBox(QGroupBox):
 
 
         widget = InputField( group_box, "button", input_name = "Next")
+        widget.show_conditions.append( ["not_pressed"] )
 
         group_box.next_group_box = 'hubbard'
 
@@ -651,6 +665,7 @@ class InputBox(QGroupBox):
         widget = InputField( group_box, "text", label_name = "J:", input_name = "J")
 
         widget = InputField( group_box, "button", input_name = "Next")
+        widget.show_conditions.append( ["not_pressed"] )
 
         group_box.next_group_box = 'vdw'
 
@@ -692,6 +707,7 @@ class InputBox(QGroupBox):
         widget = InputField( group_box, "text", label_name = "london_rvdw:", input_name = "london_rvdw")
 
         widget = InputField( group_box, "button", input_name = "Next")
+        widget.show_conditions.append( ["not_pressed"] )
 
         group_box.next_group_box = 'md'
 
@@ -762,6 +778,7 @@ class InputBox(QGroupBox):
         widget = InputField( group_box, "check", label_name = "refold_pos:", input_name = "refold_pos")
 
         widget = InputField( group_box, "button", input_name = "Next")
+        widget.show_conditions.append( ["not_pressed"] )
 
         group_box.next_group_box = 'relaxation'
 
@@ -819,6 +836,7 @@ class InputBox(QGroupBox):
         widget = InputField( group_box, "text", label_name = "w_2:", input_name = "w_2")
 
         widget = InputField( group_box, "button", input_name = "Next")
+        widget.show_conditions.append( ["not_pressed"] )
 
         group_box.next_group_box = 'magnetization'
 
@@ -861,6 +879,7 @@ class InputBox(QGroupBox):
         widget = InputField( group_box, "text", label_name = "starting_magnetization:", input_name = "starting_magnetization")
 
         widget = InputField( group_box, "button", input_name = "Next")
+        widget.show_conditions.append( ["not_pressed"] )
 
         group_box.next_group_box = 'noncollinear'
 
@@ -886,6 +905,7 @@ class InputBox(QGroupBox):
         widget = InputField( group_box, "text", label_name = "angle2:", input_name = "angle2")
 
         widget = InputField( group_box, "button", input_name = "Next")
+        widget.show_conditions.append( ["not_pressed"] )
 
         group_box.next_group_box = 'efield'
 
@@ -955,6 +975,7 @@ class InputBox(QGroupBox):
         widget = InputField( group_box, "text", label_name = "fcp_mu:", input_name = "fcp_mu")
 
         widget = InputField( group_box, "button", input_name = "Next")
+        widget.show_conditions.append( ["not_pressed"] )
 
         group_box.next_group_box = 'monopole'
 
@@ -987,6 +1008,7 @@ class InputBox(QGroupBox):
         widget = InputField( group_box, "text", label_name = "block_height:", input_name = "block_height")
 
         widget = InputField( group_box, "button", input_name = "Next")
+        widget.show_conditions.append( ["not_pressed"] )
 
         group_box.next_group_box = 'kpoint'
 
@@ -1008,6 +1030,7 @@ class InputBox(QGroupBox):
         widget = InputField( group_box, "text", label_name = "noinv:", input_name = "noinv")
 
         widget = InputField( group_box, "button", input_name = "Next")
+        widget.show_conditions.append( ["not_pressed"] )
 
         group_box.next_group_box = 'electrons'
         
@@ -1110,6 +1133,7 @@ class InputBox(QGroupBox):
         widget = InputField( group_box, "check", label_name = "tqr:", input_name = "tqr")
 
         widget = InputField( group_box, "button", input_name = "Next")
+        widget.show_conditions.append( ["not_pressed"] )
 
         group_box.next_group_box = 'print'
 
@@ -1180,13 +1204,11 @@ class InputBox(QGroupBox):
 
         #self.update_layout()
 
-    @pyqtSlot()
-    def on_click(self):
-
-        #print('PyQt5 button click')
-
-        #create the next group box
-        self.window().create_box(self.next_group_box)
+#    @pyqtSlot()
+#    def on_click(self):
+#
+#        #create the next group box
+#        self.window().create_box(self.next_group_box)
 
 
 
@@ -1211,6 +1233,9 @@ class InputField():
 
         #list of all possible combo choices
         self.combo_choices = []
+
+        #for buttons, tracks whether the button has been pressed
+        self.was_pressed = False
 
         self.group_box = parent_
 
@@ -1249,8 +1274,9 @@ class InputField():
 
         elif self.type == "button":
             
-            self.widget = InputButton(self.group_box, self.input_name)
-            self.widget.clicked.connect( self.group_box.on_click )
+            self.widget = InputButton(self.group_box, self, self.input_name)
+#            self.widget.clicked.connect( self.group_box.on_click )
+            self.widget.clicked.connect( self.widget.on_click )
 
     def initialize_value(self):
 
@@ -1410,11 +1436,22 @@ class InputButton(QPushButton):
     This class represents a button in the GUI
     """
 
-    def __init__(self, parent_, input_name = None):
+    def __init__(self, parent_, controller, input_name = None):
         super(QPushButton, self).__init__(input_name, parent = parent_)
 
         self.input_name = input_name
 
+        #this is the InputField that controls this button
+        self.controller = controller
+
+    @pyqtSlot()
+    def on_click(self):
+
+        #create the next group box
+        self.parent().window().create_box(self.parent().next_group_box)
+        self.controller.was_pressed = True
+
+        self.parent().on_update()
 
 
 
