@@ -5,7 +5,7 @@ Simple GUI for Quantum ESPRESSO
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog,
         QDialogButtonBox, QFormLayout, QGridLayout, QGroupBox, QHBoxLayout,
         QLabel, QLineEdit, QMenu, QMenuBar, QPushButton, QScrollArea, QSpinBox, 
-        QTextEdit, QVBoxLayout, QWidget )
+        QTextEdit, QVBoxLayout, QWidget, QPlainTextEdit )
 from PyQt5.QtCore import (pyqtSlot)
  
 import sys
@@ -395,18 +395,17 @@ class InputBox(QGroupBox):
         widget.add_combo_choice( "Triclinic", "14" )
 
         #GUI_lattice_vector
-        #widget = InputField( group_box, "plain_text", label_name = "Lattice Vector:", input_name = "GUI_lattice_vector")
-        #widget.widget.setMinimumWidth(500)
-        #widget.widget.setMinimumHeight(300)
+        widget = InputField( group_box, "plain_text", label_name = "Lattice Vector:", input_name = "GUI_lattice_vector")
+        widget.widget.setMaximumHeight(60)
         
         #v1
-        widget = InputField( group_box, "text", label_name = "v1:", input_name = "v1")
+        #widget = InputField( group_box, "text", label_name = "v1:", input_name = "v1")
 
         #v2
-        widget = InputField( group_box, "text", label_name = "v2:", input_name = "v2")
+        #widget = InputField( group_box, "text", label_name = "v2:", input_name = "v2")
 
         #v3
-        widget = InputField( group_box, "text", label_name = "v3:", input_name = "v3")
+        #widget = InputField( group_box, "text", label_name = "v3:", input_name = "v3")
 
         #GUI_variable_cell
         widget = InputField( group_box, "check", label_name = "Cell Relaxation:", input_name = "GUI_variable_cell")
@@ -1195,7 +1194,7 @@ class InputBox(QGroupBox):
 
 class InputField():
     """
-    This class represents a text box in the GUI
+    This class manages input fields of all types
     """
 
     def __init__(self, parent_, type, label_name = None, input_name = None):
@@ -1233,6 +1232,11 @@ class InputField():
             self.widget = InputText(self.group_box, self.input_name)
             self.widget.textChanged.connect( self.widget.on_text_changed )
 
+        elif self.type == "plain_text":
+
+            self.widget = InputPlainText(self.group_box, self.input_name)
+            self.widget.textChanged.connect( self.widget.on_text_changed )
+
         elif self.type == "combo":
 
             self.widget = InputCombo(self.group_box, self.input_name)
@@ -1246,13 +1250,17 @@ class InputField():
         elif self.type == "button":
             
             self.widget = InputButton(self.group_box, self.input_name)
-            self.widget.clicked.connect(self.group_box.on_click)
+            self.widget.clicked.connect( self.group_box.on_click )
 
     def initialize_value(self):
 
         if self.type == "text":
 
             self.group_box.input_file.inputs[self.input_name] = ""
+
+        elif self.type == "plain_text":
+
+            self.group_box.input_file.inputs[self.input_name] = ""            
 
         elif self.type == "combo":
 
@@ -1340,6 +1348,30 @@ class InputText(QLineEdit):
         self.parent().on_update()
 
         #print(input_file.inputs)
+
+class InputPlainText(QPlainTextEdit):
+    """
+    This class represents a multi-line text box in the GUI
+    """
+
+    def __init__(self, parent_, input_name = None):
+        super(QPlainTextEdit, self).__init__(parent = parent_)
+
+        self.input_name = input_name
+
+        #initialize the input text
+        try:
+            text = self.parent().input_file.inputs[self.input_name]
+            self.setText(text)
+        except KeyError:
+            pass
+
+    @pyqtSlot()
+    def on_text_changed(self):
+        
+        self.parent().input_file.inputs[self.input_name] = self.toPlainText()
+        self.parent().on_update()
+
 
 class InputCombo(QComboBox):
     """
